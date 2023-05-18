@@ -80,7 +80,7 @@ cat sites_per_contigs
 2941746 chr8
 ```
 
-We need to subsample the number of sites, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
+We will need to subsample the number of sites eventually, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
 
 
 
