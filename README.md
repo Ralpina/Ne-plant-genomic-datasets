@@ -15,6 +15,7 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 vcftools: https://vcftools.github.io/index.html
 bcftools
 GONE: [Santiago et al. 2020]
+plink v1.9:
 
 ## Directory conventions
 - data
@@ -81,6 +82,7 @@ cat sites_per_contigs
 ```
 
 We will need to subsample the number of sites eventually, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
+
 
 
 
