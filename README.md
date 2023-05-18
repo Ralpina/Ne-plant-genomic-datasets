@@ -1,6 +1,6 @@
 # Ne estimation in GONE
 
-The scripts presented here describe the analyses carried out on four plant genomic datasets to estimate effective population size (Ne) using the software GONE.
+The scripts presented here describe the analyses carried out on four plant genomic datasets to estimate effective population size (Ne) using the software GONE [Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169)
 The aims of these analyses are described in Gargiulo et al. 2023. Please cite this article when using the scripts described here.
 
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
@@ -30,7 +30,7 @@ GONE: [Santiago et al. 2020]
 ## *Fagus sylvatica*
 
 ## *Prunus armeniaca*
-#### Dataset: full dataset from Groppi et al., 2021:
+#### Dataset: the full dataset from [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
 data/apricot_collection_2019_marouch_v3.1.vcf.gz
 
 We first generate subsets of individuals, based on the population structure (Q-values) found in Groppi et al. (2021) using fastStructure.
@@ -51,7 +51,7 @@ The lists of individuals will be in the directory "indlist", where the number co
 
 We first remove all the indels, as we only need SNPs; simultaneously, we also extract only the individuals we need, to create smaller files!
 
-```
+```sh
 cd data
 vcftools --gzvcf apricot_collection_2019_marouch_v3.1.vcf.gz --remove-indels --keep ./indlist/all --recode --recode-INFO-all --stdout | gzip -c > armeniaca.SNPs.vcf.gz 
 ```
@@ -59,16 +59,17 @@ vcftools --gzvcf apricot_collection_2019_marouch_v3.1.vcf.gz --remove-indels --k
 Our new dataset is data/armeniaca.SNPs.vcf.gz
 
 To count the number of unique chromosomes or contigs:
-```
+```sh
 bcftools view -H armeniaca.SNPs.vcf.gz | cut -f 1 | uniq | awk '{print $0"\t"$0}' | wc -l
-8
 ```
 8 chromosomes!
 
 let's see how many SNPs per chromosome:
-```
+```sh
 bcftools view -H armeniaca.SNPs.vcf.gz | cut -f 1 | sort | uniq -c > sites_per_contigs
 cat sites_per_contigs
+```
+```sh
 6203547 chr1
 4110478 chr2
 3388721 chr3
@@ -78,7 +79,8 @@ cat sites_per_contigs
 3071933 chr7
 2941746 chr8
 ```
-They are too many for GONE, which accepts 10 million SNPs (or 1 million per chromosome) 
+
+We need to subsample the number of sites, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
 
 
 
