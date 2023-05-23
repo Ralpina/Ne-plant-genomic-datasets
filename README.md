@@ -202,6 +202,7 @@ quantile(Ne10M[[1]], 0.975, type = 1)
 We can now prepare the input file for plotting the results.
 Plotting the results in R:
 ``` 
+library (ggplot2)
 SNPsubsets <- read.delim("SNPsubsets.txt")
 r <-ggplot(SNPsubsets, aes(x=SNPs, y=Ne)) + geom_point(colour="#00C08D", size = 10) + geom_line(colour="#00C08D", linewidth = 6) + ylim(0,10000)
 
