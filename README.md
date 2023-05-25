@@ -193,7 +193,8 @@ We calculate median values and 95% confidence intervals using R
 ```sh
 module load R/4.1.0
 R
-Ne10M <- read.delim("./results/yellow99/Ne10M.txt")
+setwd("./results/yellow99")
+Ne10M <- read.delim("Ne10M.txt")
 median(Ne10M[[1]])
 quantile(Ne10M[[1]], 0.025, type = 1)
 quantile(Ne10M[[1]], 0.975, type = 1)
@@ -204,13 +205,13 @@ Plotting the results in R:
 ``` 
 library (ggplot2)
 SNPsubsets <- read.delim("SNPsubsets.txt")
-r <-ggplot(SNPsubsets, aes(x=SNPs, y=Ne)) + geom_point(colour="#00C08D", size = 10) + geom_line(colour="#00C08D", linewidth = 6) + ylim(0,10000)
+r <-ggplot(SNPsubsets, aes(x=SNPs, y=Ne)) + geom_point(colour="#00C08D", size = 10) + geom_line(colour="#00C08D", linewidth = 6) 
 
 rp <- r+geom_ribbon(aes(ymin=LowCI, ymax=HighCI), linetype=2, alpha=0.3, bg = "#00C08D") +
-  theme_classic() + theme(axis.text.x = element_text(face="bold", size=24), axis.text.y = element_text(face="bold", size=24)) +
-  theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold")) +
-  scale_y_continuous(labels=comma) + scale_x_continuous(labels=comma) + labs(x = "average number of SNPs per chromosome (used by GONE)", y = "Ne (Geometric mean)") 
-```
+  theme_classic() + theme(axis.text.x = element_text(face="bold", size=24, colour = "black"), axis.text.y = element_text(face="bold", size=24, colour = "black")) +
+  theme(axis.title.x = element_text(size=24, face="bold", colour = "black"), axis.title.y = element_text(size=24, face="bold", colour = "black")) +
+  scale_y_continuous(labels=comma, limits=c(0, 7000)) + scale_x_continuous(labels=comma) + labs(x = "Average number of SNPs per chromosome (used by GONE)", y = "Ne") 
+ ```
 
 
   
