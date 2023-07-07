@@ -537,7 +537,89 @@ sed $'s/$/\tyellow70\tyellow/' ./results/yellow70/Ne70.txt > ./results/yellow70/
 
 cat ./results/yellow99/Ne99yellow.txt ./results/yellow95/Ne95yellow.txt ./results/yellow90/Ne90yellow.txt ./results/yellow80/Ne80yellow.txt ./results/yellow70/Ne70yellow.txt > ./results/NeYellow.txt
 ```
+Then for the Southern gene pool dataset:
+```sh
+for i in {1..50}; do
+ awk 'NR==3' ./results/red99/Output_Ne_red99.$i 
+done | cut -f 2 > ./results/red99/Ne99.txt
 
+for i in {1..50}; do
+ awk 'NR==3' ./results/red95/Output_Ne_red95.$i 
+done | cut -f 2 > ./results/red95/Ne95.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/red90/Output_Ne_red90.$i 
+done | cut -f 2 > ./results/red90/Ne90.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/red80/Output_Ne_red80.$i 
+done | cut -f 2 > ./results/red80/Ne80.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/red70/Output_Ne_red70.$i 
+done | cut -f 2 > ./results/red70/Ne70.txt
+
+# to add two columns with labels:
+sed $'s/$/\tred99\tred/' ./results/red99/Ne99.txt > ./results/red99/Ne99red.txt
+sed $'s/$/\tred95\tred/' ./results/red95/Ne95.txt > ./results/red95/Ne95red.txt
+sed $'s/$/\tred90\tred/' ./results/red90/Ne90.txt > ./results/red90/Ne90red.txt
+sed $'s/$/\tred80\tred/' ./results/red80/Ne80.txt > ./results/red80/Ne80red.txt
+sed $'s/$/\tred70\tred/' ./results/red70/Ne70.txt > ./results/red70/Ne70red.txt
+
+cat ./results/red99/Ne99red.txt ./results/red95/Ne95red.txt ./results/red90/Ne90red.txt ./results/red80/Ne80red.txt ./results/red70/Ne70red.txt > ./results/NeRed.txt 
+```
+We concatenate results for both gene pools:
+```sh
+cat ./results/NeYellow.txt ./results/NeRed.txt > ./results/NeVsStructure.txt
+```
+We also want to get the Ne estimates for the last 25 generations:
+```sh
+for i in {1..50}; do
+ awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_yellow99.$i 
+done | cut -f 1,2 > ./results/yellow99/Ne99_25gen.txt
+
+for i in {1..50}; do
+  awk 'NR>=3 && NR<=27' ./results/yellow95/Output_Ne_yellow95.$i 
+done | cut -f 1,2 > ./results/yellow95/Ne95_25gen.txt
+
+for i in {1..50}; do
+  awk 'NR>=3 && NR<=27' ./results/yellow90/Output_Ne_yellow90.$i 
+done | cut -f 1,2 > ./results/yellow90/Ne90_25gen.txt
+
+for i in {1..50}; do
+  awk 'NR>=3 && NR<=27' ./results/yellow80/Output_Ne_yellow80.$i 
+done | cut -f 1,2 > ./results/yellow80/Ne80_25gen.txt
+
+for i in {1..50}; do
+  awk 'NR>=3 && NR<=27' ./results/yellow70/Output_Ne_yellow70.$i 
+done | cut -f 1,2 > ./results/yellow70/Ne70_25gen.txt
+
+
+# to add two columns with labels:
+
+sed $'s/$/\tyellow99\tyellow/' ./results/yellow99/Ne99_25gen.txt > ./results/yellow99/Ne99yellow_25gen.txt
+sed $'s/$/\tyellow95\tyellow/' ./results/yellow95/Ne95_25gen.txt > ./results/yellow95/Ne95yellow_25gen.txt
+sed $'s/$/\tyellow90\tyellow/' ./results/yellow90/Ne90_25gen.txt > ./results/yellow90/Ne90yellow_25gen.txt
+sed $'s/$/\tyellow80\tyellow/' ./results/yellow80/Ne80_25gen.txt > ./results/yellow80/Ne80yellow_25gen.txt
+sed $'s/$/\tyellow70\tyellow/' ./results/yellow70/Ne70_25gen.txt > ./results/yellow70/Ne70yellow_25gen.txt
+
+cat ./results/yellow99/Ne99yellow_25gen.txt ./results/yellow95/Ne95yellow_25gen.txt ./results/yellow90/Ne90yellow_25gen.txt ./results/yellow80/Ne80yellow_25gen.txt ./results/yellow70/Ne70yellow_25gen.txt > ./results/NeYellow_25gen.txt
+```
+We do the same for the Southern gene pool, then we concatenate the results in:
+```sh
+cat ./results/NeYellow_25gen.txt ./results/NeRed_25gen.txt > ./results/NeVsStructure_25gen.txt
+```
+For the total dataset, we keep results in separate files, but we can also combine them in the same plot if needed (not shown):
+```sh
+# Ne during the last generation across 50 datasets:
+for i in {1..50}; do
+ awk 'NR==3' ./results/all/Output_Ne_all.$i 
+done | cut -f 2 > ./results/all/allNe.txt
+# last 25 generations across 50 datasets:
+for i in {1..50}; do
+ awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all.$i 
+done | cut -f 1,2 > ./results/all/all_Ne25gen.txt
+```
 
   
 
