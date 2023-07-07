@@ -620,7 +620,50 @@ for i in {1..50}; do
  awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all.$i 
 done | cut -f 1,2 > ./results/all/all_Ne25gen.txt
 ```
+Plotting results in R:
+```
+library (ggplot2)
+library (scales)
+library(RColorBrewer)
+library(viridis)
 
+structure <- read.delim("NeVsStructure.txt")
+
+t <-ggplot(structure, aes(x=group, y=Ne, colour = pop)) + 
+   stat_summary(fun.data = median_hilow, mapping = aes(group=group), geom = "pointrange", 
+   size = 3, linewidth = 2, fun.args = list(conf.int = 0.95)) +
+   theme_test() + scale_y_continuous(labels=comma) +
+   theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+   axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black"), legend.title = element_text(size=14), legend.text = element_text(size=14)) + 
+    labs(x ="Proportion of genetic membership", y = "Ne (Geometric mean)")
+
+color_scale <- scale_color_manual(values = c("#FB8072","#FFFFB3"))
+t <- t + color_scale
+w <- t + facet_wrap(. ~ pop, scales="free_x") + theme(strip.background = element_rect(colour="black", fill="white", 
+                                       linewidth=0.5, linetype="solid"), strip.text.x = element_text(size=24, face="bold"))
+```	
+In the last 25 generations:
+```
+structure25 <- read.delim("NeVsStructure_25gen.txt")
+s <- ggplot(structure25, aes(x=gen, y=Ne, colour = group)) + 
+  geom_line(stat="summary", fun.data=median_hilow, aes(x=gen, y=Ne, group=group), 
+            size = 2, linetype="solid") +   
+  scale_color_viridis_d(option="magma") + 
+  theme_test() + scale_y_continuous(labels=comma) +
+  theme(axis.title.x = element_text(size=24, face="bold"), 
+        axis.title.y = element_text(size=24, face="bold"), 
+        axis.text.x = element_text(size=24, colour = "black"),
+        axis.text.y = element_text(size=24, colour = "black"), legend.title = element_text(size=14), legend.text = element_text(size=14)) + 
+  labs(x ="Generation", y = "Ne (Geometric mean)") + ylim(0,6000)
+
+v <- s + facet_wrap(. ~ pop, scales="free_x") + 
+  theme(strip.background = element_rect(colour="black", fill="white", 
+                                        linewidth=0.5, linetype="solid"), 
+        strip.text.x = element_text(size=24, face="bold"))
+
+library(patchwork)
+w / v
+```
   
 
 
