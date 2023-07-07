@@ -664,7 +664,8 @@ v <- s + facet_wrap(. ~ pop, scales="free_x") +
 library(patchwork)
 w / v
 ```
-  
+
+#### 4. Effect of using genomic scaffolds instead of chromosomes
 
 
 
