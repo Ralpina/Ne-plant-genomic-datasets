@@ -53,7 +53,6 @@ The lists of individuals will be in the directory "indlist", where the number co
 ```
 
 We first remove all the indels, as we only need SNPs; simultaneously, we also extract only the individuals we need, to create smaller files!
-
 ```sh
 cd data
 vcftools --gzvcf apricot_collection_2019_marouch_v3.1.vcf.gz --remove-indels --keep ./indlist/all --recode --recode-INFO-all --stdout | gzip -c > armeniaca.SNPs.vcf.gz 
@@ -212,9 +211,334 @@ rp <- r+geom_ribbon(aes(ymin=LowCI, ymax=HighCI), linetype=2, alpha=0.3, bg = "#
   theme(axis.title.x = element_text(size=24, face="bold", colour = "black"), axis.title.y = element_text(size=24, face="bold", colour = "black")) +
   scale_y_continuous(labels=comma, limits=c(0, 7000)) + scale_x_continuous(labels=comma) + labs(x = "Average number of SNPs per chromosome (used by GONE)", y = "Ne") 
  ```
+#### 2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) 
+
+We only select the individuals with Q-values > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure on the results obtained.
+
+We generate 50 permuted subsets of 15, 30, 45, 60, 75 individuals 
+The ```shuf``` function will permute individuals and sample them without replacement.
+
+```sh
+for i in {1..50}; do
+ shuf -n 15 ./indlist/yellow99 > ./indlist/indset15.$i
+done
+
+for i in {1..50}; do
+ shuf -n 30 ./indlist/yellow99 > ./indlist/indset30.$i
+done
+
+for i in {1..50}; do
+ shuf -n 45 ./indlist/yellow99 > ./indlist/indset45.$i
+done
+
+for i in {1..50}; do
+ shuf -n 60 ./indlist/yellow99 > ./indlist/indset60.$i
+done
+
+for i in {1..50}; do
+ shuf -n 75 ./indlist/yellow99 > ./indlist/indset75.$i
+done
+```
+
+We also need to subsample SNPs because they are too many for GONE.
+To get a list of SNPs to sample randomly, we can do the following (similarly to what we've done above):
+```sh
+module load vcftools/0.1.16
+vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --keep ./indlist/yellow99 --plink --out ./data/yellow99.SNPs
+```
+(it doesn't actually matter which individuals we include, because we only need the list of SNPs and that won't change among individual subsets).
+From the map file generated above from vcftools, we extract the list of SNPs from which we sample 3.5 million SNPs:
+```sh
+cut -f 2 ./data/yellow99.SNPs.map > ./snpslist/yellow99.SNPs          
+shuf -n 3500000 ./snpslist/yellow99.SNPs | sort  > ./snpslist/yellow3.5subset.snps       
+```
+Now we can generate the set of ped and map files for GONE, with resampled individuals:
+```sh
+module load vcftools/0.1.16
+module load plink/1.90
+
+for i in {1..50}; do 
+ vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --plink --keep ./indlist/indset15.$i --chrom-map ./data/chrom-map --out ./data/yellow99.15inds.$i
+done
+
+echo "subsampling individuals done"
+
+for i in {1..50}; do 
+ plink --file ./data/yellow99.15inds.$i --recode --extract ./snpslist/yellow3.5subset.snps --out ./data/15inds.$i
+done
+
+echo "subsampling SNPs done"
+
+for i in {1..50}; do 
+ rm ./data/yellow99.15inds.$i.ped 
+done
+
+for i in {1..50}; do 
+ rm ./data/yellow99.15inds.$i.map 
+done
+
+echo "raw ped and map files created"
+
+# to change spaces to tab delimiters:
+for i in {1..50}; do
+	tr ' ' \\t < ./data/15inds.$i.ped > ./data/test$i
+done
+
+for i in {1..50}; do
+	mv ./data/test$i ./data/15inds.$i.ped
+done
+
+# to replace the first six columns:
+for i in {1..50}; do
+	cut -f7- ./data/15inds.$i.ped > ./data/15inds.${i}Geno
+done
+
+for i in {1..50}; do
+	paste ./indlist/15 ./data/15inds.${i}Geno > ./data/15inds.$i.ped
+done
+
+# where ./indlist/15 includes the first six columns in the format required by GONE, for 15 individuals, as in: 
+# 1	IND1	0	0	1	-9
+
+echo "ped files for GONE obtained"
+
+# We then transfer the obtained ped and map files to the directory where we will run GONE ```results/yellow99```
+
+mv ./data/15inds.* ./results/yellow99
+```
+
+And finally we run GONE:
+```sh
+cd ./results/yellow99
+for i in {1..50}; do
+ bash script_GONE.sh 15inds.$i
+done
+```
+
+Then repeat the above for each individual subsampling (30, 45, 60 and 75 individuals).
+
+Preparing results to plot:
+```sh
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_15inds.$i | cut -f 2
+done  >> ./results/yellow99/Ne15inds.txt
+awk 'BEGIN{ FS = OFS = "\t" } { print $0, "15" }' ./results/yellow99/Ne15inds.txt > tmp && mv tmp ./results/yellow99/Ne15inds.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_30inds.$i | cut -f 2
+done >> ./results/yellow99/Ne30inds.txt
+awk 'BEGIN{ FS = OFS = "\t" } { print $0, "30" }' ./results/yellow99/Ne30inds.txt > tmp && mv tmp ./results/yellow99/Ne30inds.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_45inds.$i | cut -f 2
+done  >> ./results/yellow99/Ne45inds.txt
+awk 'BEGIN{ FS = OFS = "\t" } { print $0, "45" }' ./results/yellow99/Ne45inds.txt > tmp && mv tmp ./results/yellow99/Ne45inds.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_60inds.$i | cut -f 2
+done  >> ./results/yellow99/Ne60inds.txt
+awk 'BEGIN{ FS = OFS = "\t" } { print $0, "60" }' ./results/yellow99/Ne60inds.txt > tmp && mv tmp ./results/yellow99/Ne60inds.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_75inds.$i | cut -f 2 
+done >> ./results/yellow99/Ne75inds.txt
+awk 'BEGIN{ FS = OFS = "\t" } { print $0, "75" }' ./results/yellow99/Ne75inds.txt > tmp && mv tmp ./results/yellow99/Ne75inds.txt
+
+cat ./results/yellow99/Ne15inds.txt ./results/yellow99/Ne30inds.txt ./results/yellow99/Ne45inds.txt ./results/yellow99/Ne60inds.txt ./results/yellow99/Ne75inds.txt > ./results/yellow99/NeIndividuals.txt
+```
+The file ```./results/yellow99/NeIndividuals.txt``` includes Ne estimates in the first column and the subset of individuals considered in the second column. We can add the header or not.  
+
+Plotting the results in R:
+```
+library (ggplot2)
+library (scales)
+indsubsets <- read.delim("NeVsInds.txt")
+p1 <-ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
+   stat_summary(fun.data = median_hilow, mapping = aes(group=inds), 
+    geom = "pointrange", color = "#00C08D", size = 3, linewidth = 1, fun.args = list(conf.int = 0.95)) +
+	theme_test() + 
+	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black")) + 
+	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
+	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)")
+
+# to display zoom on point Ne 
+p2 <- ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
+   stat_summary(fun = median, mapping = aes(group=inds), 
+    geom = "point", color = "#00C08D", size = 10) +
+	theme_test() + 
+	theme(axis.title.x = element_text(size=16, face="bold"), axis.title.y = element_text(size=16, face="bold"), 
+	axis.text.x = element_text(size=16, colour = "black"),axis.text.y = element_text(size=16, colour = "black")) + 
+	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
+	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)") + ylim(0, 5000)
+
+# to create an insert within the main plot.	
+p1 + annotation_custom(ggplotGrob(p2), xmin = 40, xmax = 75, 
+                       ymin = 30000, ymax = 75000)		
+```
 
 
-  
+#### 3. Influence of population structure
+We first generate a list of SNPs that we need to subsample the dataset):
+```sh
+zgrep -v "#" ./data/armeniaca.SNPs.vcf.gz | cut -f 1,2 > ./snpslist/SNPlist
+shuf ./snpslist/SNPlist | head -n 3500000 | sort > ./snpslist/3.5M.SNPs
+
+module load vcftools/0.1.16
+vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --positions ./snpslist/3.5M.SNPs --recode --out ./data/armeniaca.3.5SNPs
+```
+this generates the file ```armeniaca.3.5SNPs.recode.vcf``` that we will need later.  
+Then we resample individuals for each Q-value group (for both the Southern and the Northern gene pool), repeating the resampling procedure 50 times:
+```sh
+# we resample 77 individuals in the Northern gene pool (the minimum number of individual in a Q-value group):
+for i in {1..50}; do
+ shuf -n 77 ./indlist/yellow99 > ./indlist/yellow99.$i
+done
+
+for i in {1..50}; do
+ shuf -n 77 ./indlist/yellow95 > ./indlist/yellow95.$i
+done
+
+for i in {1..50}; do
+ shuf -n 77 ./indlist/yellow90 > ./indlist/yellow90.$i
+done
+
+for i in {1..50}; do
+ shuf -n 77 ./indlist/yellow80 > ./indlist/yellow80.$i
+done
+
+for i in {1..50}; do
+ shuf -n 77 ./indlist/yellow70 > ./indlist/yellow70.$i
+done
+
+# we resample 21 individuals in the Northern gene pool (the minimum number of individual in a Q-value group):
+for i in {1..50}; do
+ shuf -n 21 ./indlist/red99 > ./indlist/red99.$i
+done
+
+for i in {1..50}; do
+ shuf -n 21 ./indlist/red95 > ./indlist/red95.$i
+done
+
+for i in {1..50}; do
+ shuf -n 21 ./indlist/red90 > ./indlist/red90.$i
+done
+
+for i in {1..50}; do
+ shuf -n 21 ./indlist/red80 > ./indlist/red80.$i
+done
+
+for i in {1..50}; do
+ shuf -n 21 ./indlist/red70 > ./indlist/red70.$i
+done
+```
+We also resample the entire dataset (255 individuals), to see the influence of mixing two different gene pools.
+```sh
+for i in {1..50}; do
+ shuf -n 77 ./indlist/all > ./indlist/all.$i
+done
+```
+As the scripts above have only generated lists of individuals, now we generate the actual SNPs dataset, in ped and map formats.
+```sh
+module load vcftools/0.1.16
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/yellow99.$i --chrom-map ./data/chrom-map --out ./data/yellow99.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/yellow95.$i --chrom-map ./data/chrom-map --out ./data/yellow95.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/yellow90.$i --chrom-map ./data/chrom-map --out ./data/yellow90.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/yellow80.$i --chrom-map ./data/chrom-map --out ./data/yellow80.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/yellow70.$i --chrom-map ./data/chrom-map --out ./data/yellow70.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/red99.$i --chrom-map ./data/chrom-map --out ./data/red99.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/red95.$i --chrom-map ./data/chrom-map --out ./data/red95.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/red90.$i --chrom-map ./data/chrom-map --out ./data/red90.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/red80.$i --chrom-map ./data/chrom-map --out ./data/red80.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/red70.$i --chrom-map ./data/chrom-map --out ./data/red70.$i
+done
+
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/all.$i --chrom-map ./data/chrom-map --out ./data/all.$i
+done
+```
+We then modify ped and map files to the format required by GONE, as done previously, for example, for the Q-value 70% dataset:
+```sh
+for i in {1..50}; do
+	cut -f7- ./data/yellow70.$i.ped > ./data/yellow70.${i}Geno
+done
+
+for i in {1..50}; do
+	paste ./indlist/77 ./data/yellow70.${i}Geno > ./data/yellow70.$i.ped
+done
+
+rm ./data/*Geno
+```
+We then move the ped and map files to the respective folders where we will run GONE,
+for example in ```./results/yellow70/```:
+```sh
+for i in {1..50}; do
+ bash script_GONE.sh yellow70.$i   
+done
+```
+Plotting the results; let's first extract last-generation Ne estimates for the Northern gene pool datasets:
+```sh
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow99/Output_Ne_yellow99.$i 
+done | cut -f 2 > ./results/yellow99/Ne99.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow95/Output_Ne_yellow95.$i 
+done | cut -f 2 > ./results/yellow95/Ne95.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow90/Output_Ne_yellow90.$i 
+done | cut -f 2 > ./results/yellow90/Ne90.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow80/Output_Ne_yellow80.$i 
+done | cut -f 2 > ./results/yellow80/Ne80.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/yellow70/Output_Ne_yellow70.$i 
+done | cut -f 2 > ./results/yellow70/Ne70.txt
+
+# to add two columns with labels:
+sed $'s/$/\tyellow99\tyellow/' ./results/yellow99/Ne99.txt > ./results/yellow99/Ne99yellow.txt
+sed $'s/$/\tyellow95\tyellow/' ./results/yellow95/Ne95.txt > ./results/yellow95/Ne95yellow.txt
+sed $'s/$/\tyellow90\tyellow/' ./results/yellow90/Ne90.txt > ./results/yellow90/Ne90yellow.txt
+sed $'s/$/\tyellow80\tyellow/' ./results/yellow80/Ne80.txt > ./results/yellow80/Ne80yellow.txt
+sed $'s/$/\tyellow70\tyellow/' ./results/yellow70/Ne70.txt > ./results/yellow70/Ne70yellow.txt
+
+cat ./results/yellow99/Ne99yellow.txt ./results/yellow95/Ne95yellow.txt ./results/yellow90/Ne90yellow.txt ./results/yellow80/Ne80yellow.txt ./results/yellow70/Ne70yellow.txt > ./results/NeYellow.txt
+```
+
+
   
 
 
