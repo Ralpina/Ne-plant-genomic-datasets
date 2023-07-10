@@ -8,14 +8,15 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 ## Datasets used:
 - *Symphonia globulifera* in [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116)
 - *Mercurialis annua* in [González-Martínez et al. 2017](https://www.sciencedirect.com/science/article/pii/S0960982217308655)
-- *Fagus sylvatica* (Ivan Scotti, pers. comm.)
+- *Fagus sylvatica* in [Lesur-Kupin & Scotti 2023](https://doi.org/10.57745/FJRYI1)
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
 
-## Software required
-vcftools: https://vcftools.github.io/index.html
-bcftools
-GONE: [Santiago et al. 2020]
-plink v1.9:
+## Software programmes and tools required
+[vcftools](https://vcftools.github.io/index.html)  
+[bcftools](http://samtools.github.io/bcftools/)  
+[GONE](https://github.com/esrud/GONE)  
+[plink v1.9](https://www.cog-genomics.org/plink2/)  
+[R](https://www.r-project.org/)  
 
 ## Directory conventions
 - data
