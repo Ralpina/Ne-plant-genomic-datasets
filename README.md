@@ -18,9 +18,10 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
    - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
 5. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)
    - [Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone)
-7. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
-8. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
-9. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
+7. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)
+   - [Preparing the datasets and running GONE]([Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone-1))
+9. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
+10. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
@@ -1049,6 +1050,206 @@ bash script_GONE.sh CoreReduced
 ```
 
 ## *Fagus sylvatica*
+#### Preparing the dataset
+Starting from [this dataset](https://doi.org/10.57745/FJRYI1), which includes 167 individual genotypes and 406 genomic scaffolds (SNPs not mapped to chromosomes), we want to evaluate how *N*<sub>e</sub> estimation in GONE changes depending on the percentage of missing data. We first extract the first 27 genomic scaffolds with the largest number of SNPs (see script "extract_scaffolds_Fagus.sh"). However, we exclude scaffolds with more than one million SNPs, to prevent GONE from crashing (the maximum number of SNPs accepted by GONE is 10 millions). We then create a chromosome map, to replace scaffold names by numbers, as required by GONE:
+```sh
+nl chrom-map > cc
+cut -f 1 cc > c1
+cut -f 2 cc > c2
+paste c2 c1 > chrom-map
+rm cc c1 c2
+```
+#### Influence of missing data on *N*<sub>e</sub> estimation 
+We can use vcftools to obtain missing data proportions per individual:
+```sh
+module load vcftools/0.1.16
+vcftools --vcf 27scaffolds.recode.vcf --missing-indv --out miss
+```
+Most individuals have a missing data proportion > 95%. We exclude these and keep 67 individuals with missing data proportion < 95% for the following analyses.
+We then generate 150 datasets by permuting 35 individuals (out of the 67 individuals retained):
+```sh
+module load vcftools/0.1.16
+for i in {1..150}; do
+ shuf -n 35 ./indlist/all > ./indlist/indset$i
+done
+# generating datasets from the lists of individuals above:
+for i in {1..150}; do
+ vcftools --gzvcf ./data/27scaffolds.recode.vcf.gz --keep ./indlist/indset$i --recode --stdout | gzip > ./data/Fagus$i.recode.vcf.gz
+done
+
+# computing missing data proportion in each dataset:
+for i in {1..150}; do
+ vcftools --gzvcf ./data/Fagus$i.recode.vcf.gz --missing-indv --out ./data/Fagus$i
+done
+
+# extracting missing data proportions per individual and printing the results in missingdata.txt
+for i in {1..150}; do
+ cut -f 1,5 ./data/Fagus$i.imiss | grep -v "INDV" >> ./data/missingdata.txt
+done
+
+# generating input files for GONE:
+for i in {1..150}; do
+ vcftools --gzvcf ./data/27scaffolds.recode.vcf.gz --plink --keep ./indlist/indset$i --chrom-map ./data/chrom-map --out ./data/Fagus$i
+done
+
+# Then we need to replace the first columns of the ped file to get the format accepted by GONE (see manual):
+# The file ./indlist/F35 looks like:
+# 1	IND1	0	0	1	-9
+# 1	IND2	0	0	1	-9
+# 1	IND3	0	0	1	-9
+# 1	IND4	0	0	1	-9
+# 1	IND5	0	0	1	-9
+# 1	IND6	0	0	1	-9
+# 1	IND7	0	0	1	-9
+# ...
+# 1	IND35	0	0	1	-9
+
+# editing the ped files:
+for i in {1..150}; do
+ cut -f7- ./data/Fagus$i.ped > ./data/Fagus${i}Geno
+done
+
+for i in {1..150}; do
+ paste ./indlist/F35 ./data/Fagus${i}Geno > ./data/Fagus$i.ped
+ rm ./data/Fagus${i}Geno
+done
+
+# moving all files .ped and .map to the directory where running GONE ../results/27contigs/
+for i in {1..50}; do
+ cp ./data/Fagus$i.ped ./results/27contigs/
+done
+
+for i in {1..50}; do
+ cp ./data/Fagus$i.map ./results/27contigs/
+done
+
+for i in {1..50}; do
+ rm ./data/Fagus$i.ped 
+ rm ./data/Fagus$i.map 
+done
+
+# make sure GONE files are there too (script_GONE.sh; PROGRAMMES directory and INPUT_PARAMETERS_FILE)
+# now running GONE by creating the following bash script: "slurmGONE":
+
+for i in {1..150}; do
+ bash script_GONE.sh Fagus$i
+done
+```
+Notice that the output file "outfileHWD" will be overwritten, so don't run GONE using a loop if you need that file.
+The other output files will have their specific code associated with the input file, so they will be fine.
+We can also remove .ped and .map no longer needed (check results have been obtained first!)
+```sh
+rm  ./results/27contigs/*.map
+rm  ./results/27contigs/*.ped
+```
+Extract *N*<sub>e</sub> estimates in the last generation from all the GONE output files:
+```sh
+for i in {1..150}; do
+ awk 'NR==3' ./results/27contigs/Output_Ne_Fagus$i 
+done | cut -f 2 > ./results/27contigs/Ne.txt
+
+# Then let's combine missing data estimates and *N*<sub>e</sub> values with the following script:
+
+# reading the input file
+input_file="Ne.txt"
+input_data=$(cat "$input_file")
+
+# creating an array with each value repeated 35 times
+repeated_data=()
+while read -r line; do
+    for i in $(seq 1 35); do
+        repeated_data+=("$line")
+    done
+done <<< "$input_data"
+
+# writing the repeated data to the output file
+output_file="Ne_repeated.txt"
+printf '%s\n' "${repeated_data[@]}" > "$output_file"
+
+# reading the contents of the missingdata.txt and Ne_repeated.txt files into arrays
+readarray -t missingdata < missingdata.txt
+readarray -t nerepeated < Ne_repeated.txt
+
+# looping over the missingdata array and add the corresponding element from nerepeated to each line
+for i in "${!missingdata[@]}"; do
+    echo -e "${missingdata[$i]}\t${nerepeated[$i]}"
+done > missingvsNe.txt
+```
+The files missingdata.txt and Ne.txt will be used to build the R script. The file "missingvsNe.txt" will then look like this:
+```
+ind	miss	Ne
+AAABOSDC	0.204339	578.102
+AAACOSDC	0.251473	578.102
+AAAGOSDC	0.924035	578.102
+# ...
+```
+and the file "missing.txt":
+```
+INDV	F_MISS	order
+AAFLOSDC	0.191767	1
+AAFNOSDC	0.198035	2
+AABYOSDC	0.199144	3
+```
+Plotting results in R:
+```
+library(ggplot2)
+library(patchwork)
+
+missing <- read.delim("missingvsNe.txt")
+missing$Ne <- as.factor(missing$Ne)
+
+f <- ggplot(missing, aes(x = miss, y = Ne))
+g <- f + stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), 
+    geom = "linerange", color = "purple", linewidth = 0.3)  + 
+	stat_summary(fun.data = median_hilow, mapping = aes(group=Ne), 
+    geom = "point", color = "purple", size = 2) +	
+	theme_classic() + 
+	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black")) 
+# Change tick mark labels
+h <- g + scale_y_discrete(breaks = levels(missing$Ne)[c(T, rep(F, 20))],
+        labels=c("200","600", "1400", "12000", "260000", "4937000", "4991000", "4994000")) + 
+		labs(x ="Proportion of missing data per individual", y = "Ne (Geometric mean)")
+# barplot:
+missing <- read.delim("missing.txt")
+M <- ggplot(missing, aes(x=order, y=F_MISS))+
+  geom_bar(stat="identity", fill="purple")+
+  theme_classic() + 
+	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black")) +
+	labs(x ="Individual", y = "Proportion of missing data")
+
+h / M
+```
+
+#### *N*<sub>e</sub> estimation with fewer genomic scaffolds:
+We can also check what happens when we use fewer genomic scaffolds, for example the 12 scaffolds with the largest number of SNPs. 
+First, see script "extract_scaffolds_Fagus.sh" to generate a vcf file with a subset of scaffolds.
+```sh
+module load vcftools/0.1.16
+# generate vcf files with a reduced number of individuals (and also thinned dataset to run in NeEstimator):
+vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --recode --stdout | gzip > ./data/Fagus12.recode.vcf.gz
+vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --thin 10000 --recode --out ./data/Fagus12.thinned35
+vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --thin 5000 --recode --out ./data/Fagus12.thinned2 
+# creating chromosome map for GONE analyses
+bcftools view -H Fagus12.recode.vcf.gz | cut -f 1 | uniq | awk '{print $0"\t"$0}' > chrom-map12
+# we need to replace scaffold name with number, as required by GONE:
+nl chrom-map12 > cc
+cut -f 1 cc > c1
+cut -f 2 cc > c2
+paste c2 c1 > chrom-map12
+rm cc c1 c2
+# generating ped and map files
+vcftools --gzvcf ./data/Fagus12.recode.vcf.gz --plink --chrom-map ./data/chrom-map12 --out ./data/Fagus12
+cut -f7- ./data/Fagus12.ped > ./data/Fagus12Geno
+paste ./indlist/F35 ./data/Fagus12Geno > ./data/Fagus12.ped
+rm ./data/Fagus12Geno
+# moving all files .ped and .map to the directory where running GONE ../results/12contigs/
+cp ./data/Fagus12.ped ./results/12contigs/Fagus12.ped
+cp ./data/Fagus12.map ./results/12contigs/Fagus12.map
+# running GONE
+bash script_GONE.sh Fagus12
+```
 
 ## References
 Gargiulo, R., Decroocq, V., González-Martínez, S.C., Lesur-Kupin, I., Paz-Vinas, I., Schmitt, S., Scotti, I., & Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. In preparation for *Evolutionary Applications*.  
