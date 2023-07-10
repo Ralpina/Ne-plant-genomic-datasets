@@ -18,10 +18,12 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
    - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
 5. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)
    - [Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone)
-7. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)
-   - [Preparing the datasets and running GONE]([Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone-1))
-9. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
-10. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
+6. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)
+   - [Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone-1)
+7. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
+   - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset-1)
+   - [Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#influence-of-missing-data-on-ne-estimation)
+8. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
