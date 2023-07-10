@@ -6,14 +6,20 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
 
 ## Table of Contents
-[Datasets used](https://github.com/Ralpina/Ne-plant-genomic-datasets#datasets-used)  
-[Software programmes and tools required](https://github.com/Ralpina/Ne-plant-genomic-datasets#software-programmes-and-tools-required)  
-[Directory conventions](https://github.com/Ralpina/Ne-plant-genomic-datasets#directory-conventions)  
-[*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)  
-[*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
-[*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
-[*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
-- [Preparing the dataset]
+1. [Datasets used](https://github.com/Ralpina/Ne-plant-genomic-datasets#datasets-used)  
+2. [Software programmes and tools required](https://github.com/Ralpina/Ne-plant-genomic-datasets#software-programmes-and-tools-required)  
+3. [Directory conventions](https://github.com/Ralpina/Ne-plant-genomic-datasets#directory-conventions)  
+4. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)  
+5. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
+6. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
+7. [*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
+   - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset)
+   - [1. Influence of number of SNPs on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#1-influence-of-number-of-snps-on-ne-estimation)
+   - [2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#2-influence-of-sample-size-resampling-only-individuals-with-the-smallest-proportion-of-admixture-on-ne-estimation)
+   - [3. Influence of population structure on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#3-influence-of-population-structure-on-ne-estimation)
+   - [4. Effect of using genomic scaffolds instead of chromosomes on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#4-effect-of-using-genomic-scaffolds-instead-of-chromosomes-on-ne-estimation)
+   - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
+  
 
 
 
