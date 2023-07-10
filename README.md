@@ -1026,11 +1026,27 @@ bash script_GONE.sh Species1
 ```
 As explained in Gargiulo et al. 2023, the analyses run on each gene pool from *Symphonia* returned the error "Too few SNPs".
 
-
-
-
-
 ## *Mercurialis annua*
+#### Preparing the datasets and running GONE
+We use the dataset from [González-Martínez et al. (2017)](https://www.sciencedirect.com/science/article/pii/S0960982217308655). For *Mercurialis*, we do not have information about the physical location of SNPs on chromosomes . As previously done for *Symphonia*, we extract information about the number of SNPs in each contig and sort the list of contigs manually (in excel), to extract the identity of the contigs with the largest number of SNPs. We also group individuals based on the gene pools found in González-Martínez et al. (2017) and divide them in different datasets: "Core", "Atlantic" and "Mediterranean". For the final analyses, we extract the 48 contigs that have a number of SNPs > 500 (to avoid the issue of having too few SNPs, observed above with *Symphonia*) and generate a new vcf file (see script "extract_contigs_Mercurialis.sh" in the scripts folder). The newly obtained dataset is ```annua.48Contigs.recode.vcf```. We then obtain ped and map files as follows: 
+```sh
+module load vcftools/0.1.16
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./Core --plink --chrom-map chrom-map48 --out CoreReduced
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./Atlantic --plink --chrom-map chrom-map48 --out AtlanticReduced
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./Mediter --plink --chrom-map chrom-map48 --out MediterReduced
+# we create the tab-delimited files "C", "A" and "M", which contains the correct format required for GONE inputs (as explained for Symphonia and Prunus above) 
+cut -f7- CoreReduced.ped > CoreReducedGeno
+paste C CoreReducedGeno > CoreReduced.ped
+
+cut -f7- AtlanticReduced.ped > AtlanticReducedGeno
+paste A AtlanticReducedGeno > AtlanticReduced.ped
+
+cut -f7- MediterReduced.ped > MediterReducedGeno
+paste M MediterReducedGeno > MediterReduced.ped
+
+# we then run GONE for the three datasets, starting with:
+bash script_GONE.sh CoreReduced
+```
 
 ## *Fagus sylvatica*
 
