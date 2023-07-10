@@ -45,6 +45,45 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 
 
 ## *Symphonia globulifera*
+#### Preparing the dataset
+We use the dataset from [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116), also available [here](https://doi.org/10.5281/zenodo.4727831). We need to group individuals based on their Q-values (according to the analyses in Schmitt et al. 2021). 
+```sh
+# obtaining Q-values from original data:
+paste symcapture.all.biallelic.snp.filtered.nonmissing.paracou.fam symcapture.all.biallelic.snp.filtered.nonmissing.paracou.3.Q > Individuals_Q
+# extracting individuals based on a Q-value >= 95%:
+awk '$7 >= 0.95' Individuals_Q > Species1
+awk '$8 >= 0.95' Individuals_Q > Species2
+awk '$9 >= 0.95' Individuals_Q > Species3
+# we can also count them:
+awk '$7 >= 0.95' Individuals_Q | wc -l
+# 228
+awk '$8 >= 0.95' Individuals_Q | wc -l
+# 107
+awk '$9 >= 0.95' Individuals_Q | wc -l
+# 30
+mkdir Ind_lists
+mv Species1 ./Ind_lists
+mv Species2 ./Ind_lists
+mv Species3 ./Ind_lists
+mv Individuals_Q ./Ind_lists
+# getting only the list of individuals
+cut -f 2 ./Ind_lists/Species1 > Ind_lists/Inds1
+cut -f 2 ./Ind_lists/Species2 > Ind_lists/Inds2
+cut -f 2 ./Ind_lists/Species3 > Ind_lists/Inds3
+```
+We now want to select the longest contigs (we do not have SNPs mapping or chromosome information for this species):
+```sh
+module load bcftools/1.13
+bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.paracou.vcf | cut -f 1 | sort | uniq -c > ContigList
+```
+Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```
+
+
+
+
+
+
+
 
 ## *Mercurialis annua*
 
