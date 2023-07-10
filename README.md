@@ -718,7 +718,7 @@ The file includes 3500000 rows and four columns (tab separated). The first row l
 "1	chr1:85	0	85"  
 The last row looks like this:    
 "8	chr8:20012701	0	20012701"  
-We create a script that replaces the number in the first column and the number next to the string "chr" (before the ":") starting from row 218750, by progressively increasing the number from 1 to 16, for each and every 218750 rows.
+We create a script that replaces the number in the first column and the number next to the string "chr" (before the ":") starting from row 218750, by progressively increasing the number from 1 to 16, for each and every 218750 rows. The script is also available in the scripts folder of this repository as "replace_chromosomes.sh" (every attempt to improve it is very welcome!).
 ```sh
 # setting the input and output file paths
 input_file="45inds.8chr.map"
