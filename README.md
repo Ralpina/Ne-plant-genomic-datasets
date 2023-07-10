@@ -962,7 +962,7 @@ m + facet_grid(missing ~ ., scales="free_y") + theme(strip.text.y = element_blan
 ```
 
 ## *Symphonia globulifera*
-#### Preparing the dataset
+#### Preparing the datasets and running GONE
 We use the dataset from [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116), also available [here](https://doi.org/10.5281/zenodo.4727831). We need to group individuals based on their Q-values (according to the analyses in Schmitt et al. 2021). 
 ```sh
 # obtaining Q-values from original data:
@@ -993,10 +993,36 @@ We now want to select the longest contigs (we do not have SNPs mapping or chromo
 module load bcftools/1.13
 bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.paracou.vcf | cut -f 1 | sort | uniq -c > ContigList
 ```
-Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```
-
-
-
+Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```. We now need to obtain ped and map files for the three gene pools (Species 1, Species 2 and Species 3). 
+```sh 
+# To get the map file, we need to create a chromosome map in which we assume that contigs = chromosomes.
+module load bcftools/1.13
+bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf | cut -f 1 | uniq | awk '{print $0"\t"$0}' > chrom-map
+# replacing contig names with numbers, as required by GONE:
+nl chrom-map > cc
+cut -f 1 cc > c1
+cut -f 2 cc > c2
+paste c2 c1 > chrom-map
+# now preparing the files in plink format for GONE
+module load vcftools/0.1.16
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds1 --plink --chrom-map chrom-map --out Species1
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds2 --plink --chrom-map chrom-map --out Species2
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds3 --plink --chrom-map chrom-map --out Species3
+# then we modify the ped file according to GONE requirements:
+cut -f7- Species3.ped > Sp3
+paste Species3 Sp3 > Species3.ped
+cut -f7- Species2.ped > Sp2
+paste Species2 Sp2 > Species2.ped
+cut -f7- Species1.ped > Sp1
+paste Species1 Sp1 > Species1.ped
+# where Species1 Species2 and Species3 are tab delimited files with 6 columns and a number of row equal to the number of individuals in the respective dataset for the three species. Their first row looks like this:
+# 1 IND1 0 0 0 -9 A T (...etc.)
+```
+Once the datasets are ready, we can move them to the appropriate directory and run GONE (remember that GONE overwrites output files, so one analysis can be run at a given time in one directory).
+```sh
+bash script_GONE.sh Species1
+```
+As explained in Gargiulo et al. 2023, the analyses run on each gene pool from *Symphonia* returned the error "Too few SNPs".
 
 
 
