@@ -17,8 +17,10 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
    - [4. Effect of using genomic scaffolds instead of chromosomes on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#4-effect-of-using-genomic-scaffolds-instead-of-chromosomes-on-ne-estimation)
    - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
 5. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)
-6. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
-7. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
+   - [Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone)
+7. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
+8. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
+9. [References]
   
 ## Datasets used:
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
@@ -1031,6 +1033,20 @@ As explained in Gargiulo et al. 2023, the analyses run on each gene pool from *S
 ## *Mercurialis annua*
 
 ## *Fagus sylvatica*
+
+## References
+Gargiulo, R., Decroocq, V., González-Martínez, S.C., Lesur-Kupin, I., Paz-Vinas, I., Schmitt, S., Scotti, I., & Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. In preparation for *Evolutionary Applications*.  
+
+Gargiulo, R., Heuertz, M., & Decroocq, V. (2023). *Prunus armeniaca* SNPs dataset [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8124822   
+
+Groppi, A., Liu, S., Cornille, A.,  Decroocq, S ... &  Decroocq, V. (2021). Population genomics of apricots unravels domestication history and adaptive events. *Nature Communications* 12,3956. https://doi.org/10.1038/s41467-021-24283-6  
+
+Lesur-Kupin, I. & Scotti, I. (2023). *Fagus sylvatica* supporting information. https://doi.org/10.57745/FJRYI1  
+
+Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives microgeographic adaptations of closely related species in two tropical tree species complexes. *Molecular Ecology* 30, 5080-5093. https://doi.org/10.1111/mec.16116  
+
+Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives microgeographic adaptations of closely-related species in two tropical tree species complexes [Data set]. In *Molecular Ecology* (0.1.0). Zenodo. https://doi.org/10.5281/zenodo.4727831  
+
 
 
 
