@@ -5,6 +5,19 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
 
+## Table of Contents
+[Datasets used](https://github.com/Ralpina/Ne-plant-genomic-datasets#datasets-used)  
+[Software programmes and tools required](https://github.com/Ralpina/Ne-plant-genomic-datasets#software-programmes-and-tools-required)  
+[Directory conventions](https://github.com/Ralpina/Ne-plant-genomic-datasets#directory-conventions)  
+[*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)  
+[*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
+[*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
+[*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
+- [Preparing the dataset]
+
+
+
+
 ## Datasets used:
 - *Symphonia globulifera* in [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116)
 - *Mercurialis annua* in [González-Martínez et al. 2017](https://www.sciencedirect.com/science/article/pii/S0960982217308655)
@@ -32,7 +45,8 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 ## *Fagus sylvatica*
 
 ## *Prunus armeniaca*
-#### Dataset: the full dataset from [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
+#### Preparing the dataset
+The full dataset from [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6) is:  
 data/apricot_collection_2019_marouch_v3.1.vcf.gz
 
 We first generate subsets of individuals, based on the population structure (Q-values) found in Groppi et al. (2021) using fastStructure.
@@ -806,7 +820,7 @@ c <-ggplot(chromsubs, aes(x=gen, y=Ne, group=chrom)) +
 c + facet_grid(facet ~ ., scales="free_y") + theme(strip.text.y = element_blank())
 ```
 
-
+#### 5. Influence of missing data on *N*<sub>e</sub> estimation
 
 
 
