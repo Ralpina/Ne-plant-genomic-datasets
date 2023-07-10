@@ -827,9 +827,100 @@ c + facet_grid(facet ~ ., scales="free_y") + theme(strip.text.y = element_blank(
 ```
 
 #### 5. Influence of missing data on *N*<sub>e</sub> estimation
+Starting from the Northern gene pool dataset with 77 individuals and 3.5 million SNPs:
+```sh
+module load vcftools/0.1.16
+vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --keep ./indlist/yellow99 --recode --out ./data/yellow3.5
+```
+we'll get the file ```yellow3.5.recode.vcf```. Now we want to randomly input missing data using a custom python v3.10 script (script name "missing.py")
 
+```py
+import random
 
+input_file = "yellow3.5.recode.vcf"
+output_file = "yellow3.5.recodeMissing20.vcf"
+missing_rate = 0.2
 
+with open(input_file, 'r') as input_vcf, open(output_file, 'w') as output_vcf:
+    for line in input_vcf:
+        if line.startswith("#"):  # Write header lines
+            output_vcf.write(line)
+        else:
+            fields = line.split("\t")
+            genotypes = fields[9:]  # Get genotype fields for all individuals
+            for i in range(len(genotypes)):
+                if random.random() < missing_rate:
+                    genotypes[i] = "./."  # Introduce missing genotype
+            fields[9:] = genotypes
+            output_vcf.write("\t".join(fields))
+```
+
+We want to test what happens when we change the missing data proportion from 20% to 80%, and therefore we edit the script to generate the datasets accordingly (i.e. missing_rate, ranging from 0.2 to 0.8 and output_file name).  
+To check that everything is correct, we can calculate the proportion of missing data per individual for each file generated:
+```sh
+module load vcftools/0.1.16
+vcftools --vcf yellow3.5.recodeMissing20.vcf --missing-indv --out miss20
+vcftools --vcf yellow3.5.recodeMissing40.vcf --missing-indv --out miss40
+vcftools --vcf yellow3.5.recodeMissing60.vcf --missing-indv --out miss60
+vcftools --vcf yellow3.5.recodeMissing80.vcf --missing-indv --out miss80
+vcftools --vcf yellow3.5.recode.vcf --missing-indv --out  miss3.5recode77inds
+```
+For each of the dataset we create ped and map files:
+```sh
+vcftools --vcf ./data/yellow3.5.recodeMissing20.vcf --plink --chrom-map ./data/chrom-map --out ./data/yellow3.5Missing20
+vcftools --vcf ./data/yellow3.5.recodeMissing40.vcf --plink --chrom-map ./data/chrom-map --out ./data/yellow3.5Missing40
+vcftools --vcf ./data/yellow3.5.recodeMissing60.vcf --plink --chrom-map ./data/chrom-map --out ./data/yellow3.5Missing60
+vcftools --vcf ./data/yellow3.5.recodeMissing80.vcf --plink --chrom-map ./data/chrom-map --out ./data/yellow3.5Missing80
+```
+We then modify them and run GONE, for example:
+```sh
+cut -f7- ./data/yellow3.5Missing20.ped > ./data/yellow3.5Missing20Geno
+paste ./indlist/77 ./data/yellow3.5Missing20Geno > ./data/yellow3.5Missing20.ped
+bash script_GONE.sh yellow3.5Missing20
+```
+Notice that *N*<sub>e</sub> estimation in GONE failed for the datasets yellow3.5Missing60 and yellow3.5Missing80.  
+Let's extract *N*<sub>e</sub> estimates in the last 25 generations and prepare the results to plot:
+```sh
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_yellow99.subset3.5M1 | cut -f 1,2 >> ./results/yellow99/NeMissing.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_yellow3.5Missing20 | cut -f 1,2 >> ./results/yellow99/NeMissing.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_yellow3.5Missing40 | cut -f 1,2 >> ./results/yellow99/NeMissing.txt
+```
+The file NeMissing.txt will look like:
+```
+gen	Ne	missing
+1	3744.29	3-8% 
+2	3744.29	3-8%
+3	3744.29	3-8%
+# ...
+1	1.46E+06	2-20%
+2	1.46E+06	2-20%
+3	1.46E+06	2-20%
+# ...
+1	4.14E+06	1-40%
+2	4.14E+06	1-40%
+3	4.14E+06	1-40%
+```
+Where 8% in the first rows corresponds to the original dataset (true percentage of missing data = 8%).  
+In R:
+```
+library(ggplot2)
+library(viridis)
+
+miss <- read.delim("NeVsMiss.txt")
+
+m <-ggplot(miss, aes(x=gen, y=Ne, group=missing)) + 
+  geom_line(aes(color=missing), linewidth = 1) +
+  geom_point(aes(fill=missing, shape = missing), color="grey20", size = 5, alpha = 0.8) +
+    scale_fill_viridis(discrete=TRUE) + theme_bw() + theme_classic() +
+    scale_color_viridis(discrete=TRUE) + 
+	scale_shape_manual(values=c(21, 22, 23)) +
+	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black"),
+	legend.title = element_text(size=20, colour = "black"),legend.text = element_text(size=20, colour = "black")) + 
+	labs(x ="Generation", y = "Ne") + scale_y_continuous(labels=comma) 
+	
+m + facet_grid(missing ~ ., scales="free_y") + theme(strip.text.y = element_blank())
+```
 
 
 
