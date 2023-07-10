@@ -220,7 +220,12 @@ quantile(Ne10M[[1]], 0.025, type = 1)
 quantile(Ne10M[[1]], 0.975, type = 1)
 ```
 
-We can now prepare the input file for plotting the results.
+We can now prepare the input file for plotting the results. The file ```SNPsubsets.txt``` looks like this:  
+```
+Ne	LowCI	HighCI	SNPs	totalSNPs
+2828.0	2374.4	3128.9	20777.5	10000000
+# ...etc.
+```
 Plotting the results in R:
 ``` 
 library (ggplot2)
@@ -368,7 +373,21 @@ awk 'BEGIN{ FS = OFS = "\t" } { print $0, "75" }' ./results/yellow99/Ne75inds.tx
 cat ./results/yellow99/Ne15inds.txt ./results/yellow99/Ne30inds.txt ./results/yellow99/Ne45inds.txt ./results/yellow99/Ne60inds.txt ./results/yellow99/Ne75inds.txt > ./results/yellow99/NeIndividuals.txt
 ```
 The file ```./results/yellow99/NeIndividuals.txt``` includes *N*<sub>e</sub> estimates in the first column and the subset of individuals considered in the second column. We can add the header or not.  
-
+The file ```NeVsInds.txt``` looks like this:  
+```
+Ne	inds
+10054.7	15
+847.069	15
+6232.01	15
+# ...
+23444.2	30
+3729.25	30
+15170.3	30
+# ... end of file:
+3415.5	75
+3605.97	75
+3513.67	75
+```
 Plotting the results in R:
 ```
 library (ggplot2)
@@ -397,8 +416,6 @@ p2 <- ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D")
 p1 + annotation_custom(ggplotGrob(p2), xmin = 40, xmax = 75, 
                        ymin = 30000, ymax = 75000)		
 ```
-
-
 #### 3. Influence of population structure on *N*<sub>e</sub> estimation
 We first generate a list of SNPs that we need to subsample the dataset):
 ```sh
@@ -615,7 +632,6 @@ for i in {1..50}; do
   awk 'NR>=3 && NR<=27' ./results/yellow70/Output_Ne_yellow70.$i 
 done | cut -f 1,2 > ./results/yellow70/Ne70_25gen.txt
 
-
 # to add two columns with labels:
 
 sed $'s/$/\tyellow99\tyellow/' ./results/yellow99/Ne99_25gen.txt > ./results/yellow99/Ne99yellow_25gen.txt
@@ -640,6 +656,40 @@ done | cut -f 2 > ./results/all/allNe.txt
 for i in {1..50}; do
  awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all.$i 
 done | cut -f 1,2 > ./results/all/all_Ne25gen.txt
+```
+The file ```NeVsStructure.txt``` looks like this:  
+```
+Ne	group	pop
+3399.45	yellow99	yellow
+3673.48	yellow99	yellow
+3454.42	yellow99	yellow
+# ...
+6856.61	yellow70	yellow
+5603.9	yellow70	yellow
+3774.62	yellow70	yellow
+178.688	red99	red
+170.765	red99	red
+196.732	red99	red
+# ... end of file:
+4118.63	all	red
+1233.03	all	red
+1784.73	all	red
+```
+The file ```NeVsStructure_25gen.txt``` looks like this:  
+```
+gen	Ne	group	pop
+1	3399.45	p99	yellow
+2	3399.45	p99	yellow
+3	3399.45	p99	yellow
+# ...
+24	4471.06	p80	yellow
+25	4408.21	p80	yellow
+1	6023.96	p80	yellow
+2	6023.96	p80	yellow
+3	6023.96	p80	yellow
+# ... end of file:
+24	5070.48	allR	red
+25	5087.75	allR	red
 ```
 Plotting results in R:
 ```
