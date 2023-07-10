@@ -1,7 +1,7 @@
-# Ne estimation in GONE
+# *N*<sub>e</sub> estimation in GONE
 
-The scripts presented here describe the analyses carried out on four plant genomic datasets to estimate effective population size (Ne) using the software GONE [Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169)
-The aims of these analyses are described in Gargiulo et al. 2023. Please cite this article when using the scripts described here.
+The scripts presented here describe the analyses carried out on four plant genomic datasets to estimate effective population size (*N*<sub>e</sub>) using the software GONE [Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169).
+The aims of these analyses are described in Gargiulo et al. 2023. Please cite this article and this repository when using the scripts described here.
 
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
 
@@ -83,7 +83,7 @@ cat sites_per_contigs
 We will need to subsample the number of sites eventually, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
 
 
-#### 1. Influence of number of SNPs on Ne estimation. 
+#### 1. Influence of number of SNPs on *N*<sub>e</sub> estimation. 
 
 We select only the individuals with Q-value > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure on the results obtained.
 
@@ -98,7 +98,7 @@ cut -f 2 yellow99.SNPs.map > ./snpslist/yellow99.snps
 wc -l yellow99.snps
 # 23974765 yellow99.snps
 ```
-We want to subsample SNPs to understand how Ne estimates change depending on the number of SNPs. 
+We want to subsample SNPs to understand how *N*<sub>e</sub> estimates change depending on the number of SNPs. 
 We also want to create confidence intervals, so we replicate each sampling procedure several times (50), to obtain different estimates across subsampled datasets.
 We can use the ```shuf``` function to sample without replacement:
 ```sh
@@ -180,7 +180,7 @@ done | awk 'BEGIN{s=0;}{s+=$1;}END{print s/NR;}'
 ```
 For the dataset with 10 million SNPs, for example, the average number of SNPs per chromosome is ```20777.5```.
 We will report these in the plot (see below).
-Then, we need to extract the Ne estimates and use them to calculate median values and confidence intervals (for Ne estimates relating to the last generation). 
+Then, we need to extract the *N*<sub>e</sub> estimates and use them to calculate median values and confidence intervals (for *N*<sub>e</sub> estimates relating to the last generation). 
 For example:
 ```sh
 for i in {1..50}; do
@@ -211,7 +211,7 @@ rp <- r+geom_ribbon(aes(ymin=LowCI, ymax=HighCI), linetype=2, alpha=0.3, bg = "#
   theme(axis.title.x = element_text(size=24, face="bold", colour = "black"), axis.title.y = element_text(size=24, face="bold", colour = "black")) +
   scale_y_continuous(labels=comma, limits=c(0, 7000)) + scale_x_continuous(labels=comma) + labs(x = "Average number of SNPs per chromosome (used by GONE)", y = "Ne") 
  ```
-#### 2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) 
+#### 2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) on *N*<sub>e</sub> estimation
 
 We only select the individuals with Q-values > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure on the results obtained.
 
@@ -346,7 +346,7 @@ awk 'BEGIN{ FS = OFS = "\t" } { print $0, "75" }' ./results/yellow99/Ne75inds.tx
 
 cat ./results/yellow99/Ne15inds.txt ./results/yellow99/Ne30inds.txt ./results/yellow99/Ne45inds.txt ./results/yellow99/Ne60inds.txt ./results/yellow99/Ne75inds.txt > ./results/yellow99/NeIndividuals.txt
 ```
-The file ```./results/yellow99/NeIndividuals.txt``` includes Ne estimates in the first column and the subset of individuals considered in the second column. We can add the header or not.  
+The file ```./results/yellow99/NeIndividuals.txt``` includes *N*<sub>e</sub> estimates in the first column and the subset of individuals considered in the second column. We can add the header or not.  
 
 Plotting the results in R:
 ```
@@ -362,7 +362,7 @@ p1 <-ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") 
 	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
 	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)")
 
-# to display zoom on point Ne 
+# to display zoom on point *N*<sub>e</sub> 
 p2 <- ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
    stat_summary(fun = median, mapping = aes(group=inds), 
     geom = "point", color = "#00C08D", size = 10) +
@@ -378,7 +378,7 @@ p1 + annotation_custom(ggplotGrob(p2), xmin = 40, xmax = 75,
 ```
 
 
-#### 3. Influence of population structure
+#### 3. Influence of population structure on *N*<sub>e</sub> estimation
 We first generate a list of SNPs that we need to subsample the dataset):
 ```sh
 zgrep -v "#" ./data/armeniaca.SNPs.vcf.gz | cut -f 1,2 > ./snpslist/SNPlist
@@ -506,7 +506,7 @@ for i in {1..50}; do
  bash script_GONE.sh yellow70.$i   
 done
 ```
-Plotting the results; let's first extract last-generation Ne estimates for the Northern gene pool datasets:
+Plotting the results; let's first extract last-generation *N*<sub>e</sub> estimates for the Northern gene pool datasets:
 ```sh
 for i in {1..50}; do
  awk 'NR==3' ./results/yellow99/Output_Ne_yellow99.$i 
@@ -572,7 +572,7 @@ We concatenate results for both gene pools:
 ```sh
 cat ./results/NeYellow.txt ./results/NeRed.txt > ./results/NeVsStructure.txt
 ```
-We also want to get the Ne estimates for the last 25 generations:
+We also want to get the *N*<sub>e</sub> estimates for the last 25 generations:
 ```sh
 for i in {1..50}; do
  awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_yellow99.$i 
@@ -611,7 +611,7 @@ cat ./results/NeYellow_25gen.txt ./results/NeRed_25gen.txt > ./results/NeVsStruc
 ```
 For the total dataset, we keep results in separate files, but we can also combine them in the same plot if needed (not shown):
 ```sh
-# Ne during the last generation across 50 datasets:
+# *N*<sub>e</sub> during the last generation across 50 datasets:
 for i in {1..50}; do
  awk 'NR==3' ./results/all/Output_Ne_all.$i 
 done | cut -f 2 > ./results/all/allNe.txt
