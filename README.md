@@ -9,26 +9,22 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 1. [Datasets used](https://github.com/Ralpina/Ne-plant-genomic-datasets#datasets-used)  
 2. [Software programmes and tools required](https://github.com/Ralpina/Ne-plant-genomic-datasets#software-programmes-and-tools-required)  
 3. [Directory conventions](https://github.com/Ralpina/Ne-plant-genomic-datasets#directory-conventions)  
-4. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)  
-5. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
-6. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
-7. [*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
+4. [*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset)
    - [1. Influence of number of SNPs on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#1-influence-of-number-of-snps-on-ne-estimation)
    - [2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#2-influence-of-sample-size-resampling-only-individuals-with-the-smallest-proportion-of-admixture-on-ne-estimation)
    - [3. Influence of population structure on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#3-influence-of-population-structure-on-ne-estimation)
    - [4. Effect of using genomic scaffolds instead of chromosomes on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#4-effect-of-using-genomic-scaffolds-instead-of-chromosomes-on-ne-estimation)
    - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
+5. [*Symphonia globulifera*](https://github.com/Ralpina/Ne-plant-genomic-datasets#symphonia-globulifera)
+6. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
+7. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)  
   
-
-
-
-
 ## Datasets used:
+- *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
 - *Symphonia globulifera* in [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116)
 - *Mercurialis annua* in [González-Martínez et al. 2017](https://www.sciencedirect.com/science/article/pii/S0960982217308655)
 - *Fagus sylvatica* in [Lesur-Kupin & Scotti 2023](https://doi.org/10.57745/FJRYI1)
-- *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
 
 ## Software programmes and tools required
 [vcftools](https://vcftools.github.io/index.html)  
@@ -42,52 +38,6 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 - results
 - indlist
 - snpslist
-
-
-## *Symphonia globulifera*
-#### Preparing the dataset
-We use the dataset from [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116), also available [here](https://doi.org/10.5281/zenodo.4727831). We need to group individuals based on their Q-values (according to the analyses in Schmitt et al. 2021). 
-```sh
-# obtaining Q-values from original data:
-paste symcapture.all.biallelic.snp.filtered.nonmissing.paracou.fam symcapture.all.biallelic.snp.filtered.nonmissing.paracou.3.Q > Individuals_Q
-# extracting individuals based on a Q-value >= 95%:
-awk '$7 >= 0.95' Individuals_Q > Species1
-awk '$8 >= 0.95' Individuals_Q > Species2
-awk '$9 >= 0.95' Individuals_Q > Species3
-# we can also count them:
-awk '$7 >= 0.95' Individuals_Q | wc -l
-# 228
-awk '$8 >= 0.95' Individuals_Q | wc -l
-# 107
-awk '$9 >= 0.95' Individuals_Q | wc -l
-# 30
-mkdir Ind_lists
-mv Species1 ./Ind_lists
-mv Species2 ./Ind_lists
-mv Species3 ./Ind_lists
-mv Individuals_Q ./Ind_lists
-# getting only the list of individuals
-cut -f 2 ./Ind_lists/Species1 > Ind_lists/Inds1
-cut -f 2 ./Ind_lists/Species2 > Ind_lists/Inds2
-cut -f 2 ./Ind_lists/Species3 > Ind_lists/Inds3
-```
-We now want to select the longest contigs (we do not have SNPs mapping or chromosome information for this species):
-```sh
-module load bcftools/1.13
-bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.paracou.vcf | cut -f 1 | sort | uniq -c > ContigList
-```
-Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```
-
-
-
-
-
-
-
-
-## *Mercurialis annua*
-
-## *Fagus sylvatica*
 
 ## *Prunus armeniaca*
 #### Preparing the dataset
@@ -1011,6 +961,50 @@ m <-ggplot(miss, aes(x=gen, y=Ne, group=missing)) +
 m + facet_grid(missing ~ ., scales="free_y") + theme(strip.text.y = element_blank())
 ```
 
+## *Symphonia globulifera*
+#### Preparing the dataset
+We use the dataset from [Schmitt et al. 2021](https://onlinelibrary.wiley.com/doi/10.1111/mec.16116), also available [here](https://doi.org/10.5281/zenodo.4727831). We need to group individuals based on their Q-values (according to the analyses in Schmitt et al. 2021). 
+```sh
+# obtaining Q-values from original data:
+paste symcapture.all.biallelic.snp.filtered.nonmissing.paracou.fam symcapture.all.biallelic.snp.filtered.nonmissing.paracou.3.Q > Individuals_Q
+# extracting individuals based on a Q-value >= 95%:
+awk '$7 >= 0.95' Individuals_Q > Species1
+awk '$8 >= 0.95' Individuals_Q > Species2
+awk '$9 >= 0.95' Individuals_Q > Species3
+# we can also count them:
+awk '$7 >= 0.95' Individuals_Q | wc -l
+# 228
+awk '$8 >= 0.95' Individuals_Q | wc -l
+# 107
+awk '$9 >= 0.95' Individuals_Q | wc -l
+# 30
+mkdir Ind_lists
+mv Species1 ./Ind_lists
+mv Species2 ./Ind_lists
+mv Species3 ./Ind_lists
+mv Individuals_Q ./Ind_lists
+# getting only the list of individuals
+cut -f 2 ./Ind_lists/Species1 > Ind_lists/Inds1
+cut -f 2 ./Ind_lists/Species2 > Ind_lists/Inds2
+cut -f 2 ./Ind_lists/Species3 > Ind_lists/Inds3
+```
+We now want to select the longest contigs (we do not have SNPs mapping or chromosome information for this species):
+```sh
+module load bcftools/1.13
+bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.paracou.vcf | cut -f 1 | sort | uniq -c > ContigList
+```
+Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```
+
+
+
+
+
+
+
+
+## *Mercurialis annua*
+
+## *Fagus sylvatica*
 
 
 
