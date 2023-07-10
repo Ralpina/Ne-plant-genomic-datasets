@@ -666,8 +666,145 @@ library(patchwork)
 w / v
 ```
 
-#### 4. Effect of using genomic scaffolds instead of chromosomes
+#### 4. Effect of using genomic scaffolds instead of chromosomes on *N*<sub>e</sub> estimation
+We work on 45 random individuals from the Northern gene pool dataset, using a subset of 3.5 M SNPs:
+```sh
+module load vcftools/0.1.16
+module load plink/1.90
+vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --plink --keep ./indlist/indset45.1 --chrom-map ./data/chrom-map --out ./data/yellow99.45inds.1
+# As above, we get ped and map files
+plink --file ./data/yellow99.45inds.1 --recode --extract ./snpslist/yellow3.5subset.snps --out ./data/45inds.8chr
+# Then we need to edit the ped file for GONE
+tr ' ' \\t < ./data/45inds.8chr.ped > ./data/test8chr
+mv ./data/test8chr ./data/45inds.8chr.ped
+cut -f7- ./data/45inds.8chr.ped > ./data/45inds.8chr.Geno
+paste ./indlist/45 ./data/45inds.8chr.Geno > ./data/45inds.8chr.ped
+```
+In this analysis, we want to try to assign SNPs to a number of chromosomes greater than the true one (8 chromosomes), simulating what happens when we have information about genomic scaffolds or short linkage blocks but we don't have SNPs mapped to full chromosomes. We want to assign SNPs to either:  
+-16 chromosomes  
+-32 chromosomes  
+-64 chromosomes  
+-128 chromosomes  
+Approximately, we want to get for each of these "assumed" chromosomes:  
+3500000/8 = 437,500 SNPs  
+3500000/16 = 218,750 SNPs  
+3500000/32 = 109,375 SNPs  
+3500000/64 = 54,688 SNPs  
+3500000/128 = 27,344 SNPs  
+Of course, these are averaged values, but in reality some chromosomes will have more and some fewer SNPs.
 
+We then modify the file ```45inds.8chr.map``` to redistribute the SNPs to a progressively higher number of chromosomes.  
+The file includes 3500000 rows and four columns (tab separated). The first row looks like this:  
+"1	chr1:85	0	85"  
+The last row looks like this:    
+"8	chr8:20012701	0	20012701"  
+We create a script that replaces the number in the first column and the number next to the string "chr" (before the ":") starting from row 218750, by progressively increasing the number from 1 to 16, for each and every 218750 rows.
+```sh
+# setting the input and output file paths
+input_file="45inds.8chr.map"
+output_file="45inds.16chr.map"
+# setting the starting row and increment
+start_row=218750
+increment=1
+# loop through each line in the input file
+line_number=0
+while read line; do
+    line_number=$((line_number + 1))
+
+    # checking if this line should have the numbers replaced
+    if [ $line_number -ge $start_row ]; then
+        # calculating the new values for the first two columns
+        new_first_col=$(( (line_number - start_row) / start_row + increment + 1 ))
+        new_second_col="chr$new_first_col:"
+        
+        # replacing the first column and the number after "chr"
+        modified_line=$(echo "$line" | sed "s/^[0-9]\+\s/""$new_first_col""\t/")
+        modified_line=$(echo "$modified_line" | sed "s/chr[0-9]\+:/""$new_second_col""/")
+
+        # appending the modified line to the output file
+        echo "$modified_line" >> "$output_file"
+    else
+        # appending the original line to the output file
+        echo "$line" >> "$output_file"
+    fi
+done < "$input_file"
+```
+
+Then I do the same for the other redistributions (32 to 128 chromosomes), every time changing the script according to the values required in this parts of the script:
+```
+input_file="45inds.8chr.map"
+output_file="45inds.16chr.map"
+```
+and
+```
+#setting the starting row and increment
+start_row=218750
+increment=1
+```
+At the end, we will have the following chromosome maps:  
+```
+45inds.8chr.map
+45inds.16chr.map
+45inds.32chr.map
+45inds.64chr.map
+45inds.128chr.map
+```
+Warning: 45inds.16chr.map and 45inds.32chr.map have one chromosome more in the last line (17 and 33 respectively); I just replace the values manually.  
+We do not change the ped file, but we rename it every time, as GONE needs ped and map file to have the same prefix.  
+```sh
+cp 45inds.8chr.ped 45inds.16chr.ped
+cp 45inds.8chr.ped 45inds.32chr.ped
+cp 45inds.8chr.ped 45inds.64chr.ped
+cp 45inds.8chr.ped 45inds.128chr.ped
+```
+We then run GONE in the appropriate folder (we cannot run more than one analysis in the same folder, as GONE overwrites output files), e.g.:
+```sh
+bash script_GONE.sh 45inds.16chr
+```
+To prepare the results for plotting:
+```sh
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.8chr > ./results/yellow99/Ne8chr.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.16chr > ./results/yellow99/Ne16chr.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.32chr > ./results/yellow99/Ne32chr.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.64chr > ./results/yellow99/Ne64chr.txt
+awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.128chr > ./results/yellow99/Ne128chr.txt
+
+cat ./results/yellow99/Ne8chr.txt ./results/yellow99/Ne16chr.txt ./results/yellow99/Ne32chr.txt ./results/yellow99/Ne64chr.txt ./results/yellow99/Ne128chr.txt > ./results/yellow99/NeByChrom.txt
+```
+We can modify the file "NeByChrom.txt" manually to include information about chromosomes. The file will look like this:
+```
+gen	Ne	chrom	facet
+1	4566.61	1-8chr	facet3
+2	4566.61	1-8chr	facet3
+3	4566.61	1-8chr	facet3
+# ...
+1	13229.1	3-32chr	facet3
+2	13229.1	3-32chr	facet3
+3	13229.1	3-32chr	facet3
+# ...
+23	761005	5-128chr	facet1
+24	769090	5-128chr	facet1
+25	784894	5-128chr	facet1
+```
+Facets facilitate displaying very different *N*<sub>e</sub> values over the y axis, see below.  
+In R:
+```
+library(ggplot2)
+library(viridis)
+chromsubs <- read.delim("NeByChrom.txt")
+
+c <-ggplot(chromsubs, aes(x=gen, y=Ne, group=chrom)) + 
+  geom_line(aes(color=chrom), linewidth = 1) +
+  geom_point(aes(fill=chrom), color="grey20", size = 5, alpha = 0.8, shape=21)+
+    scale_fill_viridis(discrete=TRUE) + theme_bw() + theme_classic() +
+    scale_color_viridis(discrete=TRUE) + 
+	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
+	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black"),
+	legend.title = element_text(size=20, colour = "black"),legend.text = element_text(size=20, colour = "black")) + 
+	labs(x ="Generation", y = "Ne (Geometric mean)") + scale_y_continuous(labels=comma) 
+	
+c + facet_grid(facet ~ ., scales="free_y") + theme(strip.text.y = element_blank())
+```
 
 
 
