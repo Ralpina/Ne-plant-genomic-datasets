@@ -20,7 +20,7 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
    - [Preparing the datasets and running GONE](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-datasets-and-running-gone)
 7. [*Mercurialis annua*](https://github.com/Ralpina/Ne-plant-genomic-datasets#mercurialis-annua)  
 8. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
-9. [References]
+9. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
@@ -1037,7 +1037,8 @@ As explained in Gargiulo et al. 2023, the analyses run on each gene pool from *S
 ## References
 Gargiulo, R., Decroocq, V., González-Martínez, S.C., Lesur-Kupin, I., Paz-Vinas, I., Schmitt, S., Scotti, I., & Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. In preparation for *Evolutionary Applications*.  
 
-Gargiulo, R., Heuertz, M., & Decroocq, V. (2023). *Prunus armeniaca* SNPs dataset [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8124822   
+Gargiulo, R., Heuertz, M., & Decroocq, V. (2023). *Prunus armeniaca* SNPs dataset [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8124822  
+González-Martínez, S.C., Ridout, K., Pannell, J.R. (2017). Range expansion compromises adaptive evolution in an outcrossing plant. *Current Biology* 27, 2544–2551. https://doi.org/10.1016/j.cub.2017.07.007  
 
 Groppi, A., Liu, S., Cornille, A.,  Decroocq, S ... &  Decroocq, V. (2021). Population genomics of apricots unravels domestication history and adaptive events. *Nature Communications* 12,3956. https://doi.org/10.1038/s41467-021-24283-6  
 
