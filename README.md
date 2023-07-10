@@ -1266,7 +1266,11 @@ Lesur-Kupin, I. & Scotti, I. (2023). *Fagus sylvatica* supporting information. h
 
 Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives microgeographic adaptations of closely related species in two tropical tree species complexes. *Molecular Ecology* 30, 5080-5093. https://doi.org/10.1111/mec.16116  
 
-Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives microgeographic adaptations of closely-related species in two tropical tree species complexes [Data set]. In *Molecular Ecology* (0.1.0). Zenodo. https://doi.org/10.5281/zenodo.4727831  
+Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives microgeographic adaptations of closely-related species in two tropical tree species complexes [Data set]. In *Molecular Ecology* (0.1.0). Zenodo. https://doi.org/10.5281/zenodo.4727831    
+
+
+
+
 
 
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
