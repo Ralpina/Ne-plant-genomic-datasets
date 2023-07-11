@@ -1,7 +1,7 @@
 # *N*<sub>e</sub> estimation in GONE
 
-The scripts presented here describe the analyses carried out on four plant genomic datasets to estimate effective population size (*N*<sub>e</sub>) using the software GONE [Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169).
-The aims of these analyses are described in Gargiulo et al. 2023. Please cite this article and this repository when using the scripts described here.
+The analyses presented here describe effective population size (*N*<sub>e</sub>) estimation carried out for four plant genomic datasets,  using the software GONE [Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169).
+The aims of these analyses are described in Gargiulo et al. 2023. Please cite the article and this repository when using the code described here. Most scripts are included in this README; a few additional scripts are available in the scripts directory of this repository.
 
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
 
@@ -12,7 +12,7 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 4. [*Prunus armeniaca*](https://github.com/Ralpina/Ne-plant-genomic-datasets#prunus-armeniaca)
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset)
    - [1. Influence of number of SNPs on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#1-influence-of-number-of-snps-on-ne-estimation)
-   - [2. Influence of sample size (resampling only individuals with the smallest proportion of admixture) on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#2-influence-of-sample-size-resampling-only-individuals-with-the-smallest-proportion-of-admixture-on-ne-estimation)
+   - [2. Influence of sample size on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#2-influence-of-sample-size-resampling-only-individuals-with-the-smallest-proportion-of-admixture-on-ne-estimation)
    - [3. Influence of population structure on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#3-influence-of-population-structure-on-ne-estimation)
    - [4. Effect of using genomic scaffolds instead of chromosomes on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#4-effect-of-using-genomic-scaffolds-instead-of-chromosomes-on-ne-estimation)
    - [5. Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#5-influence-of-missing-data-on-ne-estimation)
@@ -39,10 +39,11 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 [R](https://www.r-project.org/)  
 
 ## Directory conventions
+All scripts include relative paths assuming that directories are organised as follows:
 - data
 - results
 - indlist
-- snpslist
+- snpslist  
 
 ## *Prunus armeniaca*
 #### Preparing the dataset
@@ -1224,7 +1225,7 @@ M <- ggplot(missing, aes(x=order, y=F_MISS))+
 h / M
 ```
 
-#### *N*<sub>e</sub> estimation with fewer genomic scaffolds:
+#### *N*<sub>e</sub> estimation with fewer genomic scaffolds
 We can also check what happens when we use fewer genomic scaffolds, for example the 12 scaffolds with the largest number of SNPs. 
 First, see script "extract_scaffolds_Fagus.sh" to generate a vcf file with a subset of scaffolds.
 ```sh
