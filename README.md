@@ -23,6 +23,7 @@ The aims of these analyses are described in Gargiulo et al. 2023. Please cite th
 7. [*Fagus sylvatica*](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset-1)
    - [Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#influence-of-missing-data-on-ne-estimation)
+   - [*N*<sub>e</sub> estimation with fewer genomic scaffolds](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#ne-estimation-with-fewer-genomic-scaffolds)
 8. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
@@ -51,7 +52,7 @@ The full dataset from [Groppi et al. 2021](https://www.nature.com/articles/s4146
 data/apricot_collection_2019_marouch_v3.1.vcf.gz
 
 We first generate subsets of individuals, based on the population structure (Q-values) found in Groppi et al. (2021) using fastStructure.
-We are interested in two main clusters (red or Southern gene pool, and yellow or Northern gene pool), with Q-values per individual ranging from >70% to >99%.
+We are interested in two main clusters (red or Southern gene pool, and yellow or Northern gene pool), with Q-value percentages per individual ranging from 70% to 100%.
 The lists of individuals will be in the directory "indlist", where the number corresponds to Q-value for each genetic cluster.
 
 ```sh
@@ -68,13 +69,13 @@ The lists of individuals will be in the directory "indlist", where the number co
 # indlist/all (=Red70+Yellow70)
 ```
 
-We first remove all the indels, as we only need SNPs; simultaneously, we also extract only the individuals we need, to create smaller files!
+We first remove all the indels, as we only need SNPs; simultaneously, we only extract the individuals we need:
 ```sh
 cd data
 vcftools --gzvcf apricot_collection_2019_marouch_v3.1.vcf.gz --remove-indels --keep ./indlist/all --recode --recode-INFO-all --stdout | gzip -c > armeniaca.SNPs.vcf.gz 
 ```
 
-Our new dataset is data/armeniaca.SNPs.vcf.gz
+Our new dataset is data/armeniaca.SNPs.vcf.gz (available [here](https://zenodo.org/record/8124822))
 
 To count the number of unique chromosomes or contigs:
 ```sh
@@ -96,12 +97,12 @@ cat sites_per_contigs
 # 2941746 chr8
 ```
 
-We will need to subsample the number of sites eventually, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome)
+We will need to subsample the number of sites eventually, as GONE accepts a maximum of 10 million SNPs (or 1 million per chromosome).
 
 
 #### 1. Influence of number of SNPs on *N*<sub>e</sub> estimation. 
 
-We select only the individuals with Q-value > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure on the results obtained.
+We only select the individuals with a Q-value > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure (admixture) on the results obtained.
 
 ```sh
 module load vcftools/0.1.16
@@ -124,9 +125,9 @@ for i in {1..50}; do
 done
 ```
 where ```-n``` tells the shuffle command to sample the specified maximum number of lines.
-```sort``` will reorder the list 50 SNPs subsets were created this way.
+```sort``` will reorder the list; 50 SNPs subsets are created in this way.
 
-We repeat the above also by subsampling 50 times 10000000, 7000000, 3500000, 500000, 300000, 150000, 80000 and 40000 SNPs (every time, we change the file names accordingly).
+We also repeat the above by subsampling 50 times the following numbers of SNPs: 10,000,000; 7,000,000; 3,500,000; 500,000; 300,000; 150,000; 80,000; and 40,000 SNPs (each time by changing the file names accordingly).
 If needed, we can check how many SNPs per chromosome have been subsampled, for example in the first subset:
 ```sh
 grep -c "chr1" ./snpslist/subset10M1.snps 
@@ -188,6 +189,8 @@ for i in {1..50}; do
  bash script_GONE.sh yellow99.subset10M$i
 done
 ```
+WARNING: GONE overwrites temporary files and the output file "outfileHWD", and therefore (1) multiple instances of GONE cannot be run in the same directory; (2) running GONE using a loop will only overwrite the output file "outfileHWD" (do not use a loop if that file is needed).  
+
 Once the analyses in GONE are complete, we want to calculate the average number of SNPs per chromosome used by GONE:
 ```sh
 for i in {1..50}; do
@@ -204,7 +207,7 @@ for i in {1..50}; do
 done >> ./results/yellow99/Ne10M.txt
 ```
 
-We calculate median values and 95% confidence intervals using R
+We calculate median values and 95% confidence intervals using R (from command line):
 ```sh
 module load R/4.1.0
 R
@@ -237,7 +240,7 @@ rp <- r+geom_ribbon(aes(ymin=LowCI, ymax=HighCI), linetype=2, alpha=0.3, bg = "#
 We only select the individuals with Q-values > 99% (77 individuals) from the Northern gene pool (yellow gene pool), to avoid the influence of population structure on the results obtained.
 
 We generate 50 permuted subsets of 15, 30, 45, 60, 75 individuals 
-The ```shuf``` function will permute individuals and sample them without replacement.
+The ```shuf``` function will permute individuals and will sample them without replacement.
 
 ```sh
 for i in {1..50}; do
@@ -261,14 +264,14 @@ for i in {1..50}; do
 done
 ```
 
-We also need to subsample SNPs because they are too many for GONE.
+We also need to subsample SNPs, as the total number of SNPs exceeds GONE limits.
 To get a list of SNPs to sample randomly, we can do the following (similarly to what we've done above):
 ```sh
 module load vcftools/0.1.16
 vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --keep ./indlist/yellow99 --plink --out ./data/yellow99.SNPs
 ```
 (it doesn't actually matter which individuals we include, because we only need the list of SNPs and that won't change among individual subsets).
-From the map file generated above from vcftools, we extract the list of SNPs from which we sample 3.5 million SNPs:
+From the map file generated above from vcftools, we extract the list of SNPs and we sample 3.5 million SNPs from it:
 ```sh
 cut -f 2 ./data/yellow99.SNPs.map > ./snpslist/yellow99.SNPs          
 shuf -n 3500000 ./snpslist/yellow99.SNPs | sort  > ./snpslist/yellow3.5subset.snps       
@@ -336,7 +339,7 @@ for i in {1..50}; do
 done
 ```
 
-Then repeat the above for each individual subsampling (30, 45, 60 and 75 individuals).
+Then we can repeat the above for each individual subsampling (30, 45, 60 and 75 individuals).
 
 Preparing results to plot:
 ```sh
@@ -368,7 +371,7 @@ awk 'BEGIN{ FS = OFS = "\t" } { print $0, "75" }' ./results/yellow99/Ne75inds.tx
 cat ./results/yellow99/Ne15inds.txt ./results/yellow99/Ne30inds.txt ./results/yellow99/Ne45inds.txt ./results/yellow99/Ne60inds.txt ./results/yellow99/Ne75inds.txt > ./results/yellow99/NeIndividuals.txt
 ```
 The file ```./results/yellow99/NeIndividuals.txt``` includes *N*<sub>e</sub> estimates in the first column and the subset of individuals considered in the second column. We can add the header or not.  
-The file ```NeVsInds.txt``` looks like this:  
+The file ```NeVsInds.txt``` (used below) looks like this:  
 ```
 Ne	inds
 10054.7	15
@@ -412,7 +415,7 @@ p1 + annotation_custom(ggplotGrob(p2), xmin = 40, xmax = 75,
                        ymin = 30000, ymax = 75000)		
 ```
 #### 3. Influence of population structure on *N*<sub>e</sub> estimation
-We first generate a list of SNPs that we need to subsample the dataset):
+We first generate a list of SNPs, to subsample the dataset:
 ```sh
 zgrep -v "#" ./data/armeniaca.SNPs.vcf.gz | cut -f 1,2 > ./snpslist/SNPlist
 shuf ./snpslist/SNPlist | head -n 3500000 | sort > ./snpslist/3.5M.SNPs
@@ -421,7 +424,7 @@ module load vcftools/0.1.16
 vcftools --gzvcf ./data/armeniaca.SNPs.vcf.gz --positions ./snpslist/3.5M.SNPs --recode --out ./data/armeniaca.3.5SNPs
 ```
 this generates the file ```armeniaca.3.5SNPs.recode.vcf``` that we will need later.  
-Then we resample individuals for each Q-value group (for both the Southern and the Northern gene pool), repeating the resampling procedure 50 times:
+We then resample individuals for each Q-value group (for both the Southern and the Northern gene pool), repeating the resampling procedure 50 times:
 ```sh
 # we resample 77 individuals in the Northern gene pool (the minimum number of individual in a Q-value group):
 for i in {1..50}; do
@@ -471,7 +474,7 @@ for i in {1..50}; do
  shuf -n 77 ./indlist/all > ./indlist/all.$i
 done
 ```
-As the scripts above have only generated lists of individuals, now we generate the actual SNPs dataset, in ped and map formats.
+As the scripts above have only generated lists of individuals; we now generate the actual SNPs dataset, in ped and map formats.
 ```sh
 module load vcftools/0.1.16
 
@@ -652,7 +655,7 @@ for i in {1..50}; do
  awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all.$i 
 done | cut -f 1,2 > ./results/all/all_Ne25gen.txt
 ```
-The file ```NeVsStructure.txt``` looks like this:  
+The file ```NeVsStructure.txt``` (used below in R) looks like this:  
 ```
 Ne	group	pop
 3399.45	yellow99	yellow
@@ -670,7 +673,7 @@ Ne	group	pop
 1233.03	all	red
 1784.73	all	red
 ```
-The file ```NeVsStructure_25gen.txt``` looks like this:  
+The file ```NeVsStructure_25gen.txt``` (used below in R) looks like this:  
 ```
 gen	Ne	group	pop
 1	3399.45	p99	yellow
@@ -688,8 +691,8 @@ gen	Ne	group	pop
 ```
 Plotting results in R:
 ```
-library (ggplot2)
-library (scales)
+library(ggplot2)
+library(scales)
 library(RColorBrewer)
 library(viridis)
 
@@ -745,7 +748,7 @@ mv ./data/test8chr ./data/45inds.8chr.ped
 cut -f7- ./data/45inds.8chr.ped > ./data/45inds.8chr.Geno
 paste ./indlist/45 ./data/45inds.8chr.Geno > ./data/45inds.8chr.ped
 ```
-In this analysis, we want to try to assign SNPs to a number of chromosomes greater than the true one (8 chromosomes), simulating what happens when we have information about genomic scaffolds or short linkage blocks but we don't have SNPs mapped to full chromosomes. We want to assign SNPs to either:  
+In this analysis, we want to try to assign SNPs to a number of chromosomes larger than the true one (8 chromosomes), simulating what happens when we have information about genomic scaffolds or short linkage blocks but we don't have SNPs mapped to full chromosomes. We want to assign SNPs to either:  
 -16 chromosomes  
 -32 chromosomes  
 -64 chromosomes  
@@ -758,8 +761,8 @@ Approximately, we want to get for each of these "assumed" chromosomes:
 3500000/128 = 27,344 SNPs  
 Of course, these are averaged values, but in reality some chromosomes will have more and some fewer SNPs.
 
-We then modify the file ```45inds.8chr.map``` to redistribute the SNPs to a progressively higher number of chromosomes.  
-The file includes 3500000 rows and four columns (tab separated). The first row looks like this:  
+We then modify the file ```45inds.8chr.map``` to redistribute the SNPs to a progressively larger number of chromosomes.  
+The file includes 3,500,000 rows and four columns (tab-separated). The first row looks like this:  
 "1	chr1:85	0	85"  
 The last row looks like this:    
 "8	chr8:20012701	0	20012701"  
@@ -795,7 +798,7 @@ while read line; do
 done < "$input_file"
 ```
 
-Then I do the same for the other redistributions (32 to 128 chromosomes), every time changing the script according to the values required in this parts of the script:
+Then I do the same to generate other assignments (of SNPs to chromosomes, from 32 to 128 chromosomes), every time changing the script according to the values required in these bits of the script:
 ```
 input_file="45inds.8chr.map"
 output_file="45inds.16chr.map"
@@ -814,7 +817,7 @@ At the end, we will have the following chromosome maps:
 45inds.64chr.map
 45inds.128chr.map
 ```
-Warning: 45inds.16chr.map and 45inds.32chr.map have one chromosome more in the last line (17 and 33 respectively); I just replace the values manually.  
+WARNING: 45inds.16chr.map and 45inds.32chr.map have one chromosome more in the last row (17 and 33 respectively); I just replace the values manually.  
 We do not change the ped file, but we rename it every time, as GONE needs ped and map file to have the same prefix.  
 ```sh
 cp 45inds.8chr.ped 45inds.16chr.ped
@@ -836,7 +839,7 @@ awk 'NR>=3 && NR<=27' ./results/yellow99/Output_Ne_45inds.128chr > ./results/yel
 
 cat ./results/yellow99/Ne8chr.txt ./results/yellow99/Ne16chr.txt ./results/yellow99/Ne32chr.txt ./results/yellow99/Ne64chr.txt ./results/yellow99/Ne128chr.txt > ./results/yellow99/NeByChrom.txt
 ```
-We can modify the file "NeByChrom.txt" manually to include information about chromosomes. The file will look like this:
+We can manually modify the file "NeByChrom.txt" to include information about chromosomes. The file will look like this:
 ```
 gen	Ne	chrom	facet
 1	4566.61	1-8chr	facet3
@@ -852,7 +855,7 @@ gen	Ne	chrom	facet
 25	784894	5-128chr	facet1
 ```
 Facets facilitate displaying very different *N*<sub>e</sub> values over the y axis, see below.  
-In R:
+Plotting results in R:
 ```
 library(ggplot2)
 library(viridis)
@@ -877,7 +880,7 @@ Starting from the Northern gene pool dataset with 77 individuals and 3.5 million
 module load vcftools/0.1.16
 vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --keep ./indlist/yellow99 --recode --out ./data/yellow3.5
 ```
-we'll get the file ```yellow3.5.recode.vcf```. Now we want to randomly input missing data using a custom python v3.10 script (script name "missing.py")
+we'll get the file ```yellow3.5.recode.vcf```. Now we want to randomly input missing data using a custom python v3.10 script (script name "missing.py", also available in the scripts folder of this repository):
 
 ```py
 import random
@@ -999,7 +1002,8 @@ We now want to select the longest contigs (we do not have SNPs mapping or chromo
 module load bcftools/1.13
 bcftools view -H symcapture.all.biallelic.snp.filtered.nonmissing.paracou.vcf | cut -f 1 | sort | uniq -c > ContigList
 ```
-Manual step: I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs. Then I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```. We now need to obtain ped and map files for the three gene pools (Species 1, Species 2 and Species 3). 
+Manual step: in Excel, I sorted the contigs obtained in the file by number of SNPs and extracted the 125 contigs with the largest number of SNPs; then, I created the vcf file with the script "extract_contigs_Symphonia.sh" (see scripts folder). The dataset generated is ```symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou```.  
+We now need to obtain ped and map files for the three gene pools (Species 1, Species 2 and Species 3):
 ```sh 
 # To get the map file, we need to create a chromosome map in which we assume that contigs = chromosomes.
 module load bcftools/1.13
@@ -1138,8 +1142,8 @@ for i in {1..150}; do
  bash script_GONE.sh Fagus$i
 done
 ```
-Notice that the output file "outfileHWD" will be overwritten, so don't run GONE using a loop if you need that file.
-The other output files will have their specific code associated with the input file, so they will be fine.
+As explained above, the output file "outfileHWD" will be overwritten, but we don't need it.
+The other output files will have their specific code (corresponding to that of the input file) and won't be overwritten.
 We can also remove .ped and .map no longer needed (check results have been obtained first!)
 ```sh
 rm  ./results/27contigs/*.map
@@ -1180,7 +1184,7 @@ done > missingvsNe.txt
 ```
 The files missingdata.txt and Ne.txt will be used to build the R script. The file "missingvsNe.txt" will then look like this:
 ```
-ind	miss	Ne
+ind		miss		Ne
 AAABOSDC	0.204339	578.102
 AAACOSDC	0.251473	578.102
 AAAGOSDC	0.924035	578.102
@@ -1188,7 +1192,7 @@ AAAGOSDC	0.924035	578.102
 ```
 and the file "missing.txt":
 ```
-INDV	F_MISS	order
+INDV		F_MISS		order
 AAFLOSDC	0.191767	1
 AAFNOSDC	0.198035	2
 AABYOSDC	0.199144	3
@@ -1226,11 +1230,11 @@ h / M
 ```
 
 #### *N*<sub>e</sub> estimation with fewer genomic scaffolds
-We can also check what happens when we use fewer genomic scaffolds, for example the 12 scaffolds with the largest number of SNPs. 
+We can also check what happens when we use fewer genomic scaffolds from the *F. sylvatica* dataset, for example the 12 scaffolds with the largest number of SNPs. 
 First, see script "extract_scaffolds_Fagus.sh" to generate a vcf file with a subset of scaffolds.
 ```sh
 module load vcftools/0.1.16
-# generate vcf files with a reduced number of individuals (and also thinned dataset to run in NeEstimator):
+# generate vcf files with a reduced number of individuals (the commands below also include the "--thin" parameter to generate thinned dataset to be run in NeEstimator - analyses not shown here, but described in the manuscript):
 vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --recode --stdout | gzip > ./data/Fagus12.recode.vcf.gz
 vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --thin 10000 --recode --out ./data/Fagus12.thinned35
 vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --thin 5000 --recode --out ./data/Fagus12.thinned2 
@@ -1274,7 +1278,7 @@ Schmitt, S., Tysklind, N., Hérault, B., & Heuertz, M. (2021). Topography drives
 
 
 
-Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
+[![CC BY 4.0][cc-by-shield]][cc-by]
 
 This work is licensed under a
 [Creative Commons Attribution 4.0 International License][cc-by].
