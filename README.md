@@ -1259,7 +1259,7 @@ bash script_GONE.sh Fagus12
 ```
 
 ## References
-Gargiulo, R., Decroocq, V., González-Martínez, S.C., Paz-Vinas, I., Aury, J.-M., Lesur-Kupin, I., Plomion, C.,Schmitt, S., Scotti, I., Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. bioRxiv 2023.07.18.549323; doi: https://doi.org/10.1101/2023.07.18.549323 
+Gargiulo, R., Decroocq, V., González-Martínez, S.C., Paz-Vinas, I., Aury, J.-M., Lesur-Kupin, I., Plomion, C., Schmitt, S., Scotti, I., Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. bioRxiv 2023.07.18.549323; doi: https://doi.org/10.1101/2023.07.18.549323 
 
 Gargiulo, R., Heuertz, M., & Decroocq, V. (2023). *Prunus armeniaca* SNPs dataset [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8124822  
 
