@@ -390,29 +390,32 @@ Plotting the results in R:
 ```
 library (ggplot2)
 library (scales)
+library(psych)
 indsubsets <- read.delim("NeVsInds.txt")
 p1 <-ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
    stat_summary(fun.data = median_hilow, mapping = aes(group=inds), 
-    geom = "pointrange", color = "#00C08D", size = 3, linewidth = 1, fun.args = list(conf.int = 0.95)) +
+    geom = "linerange", color = "#00C08D", linewidth = 1, fun.args = list(conf.int = 0.95)) +
+    stat_summary(fun = "geometric.mean", mapping = aes(group=inds), 
+    geom = "point", color = "#00C08D", size = 6) +
+	theme_test() + 
+	theme(axis.title.x = element_text(size=14, face="bold"), axis.title.y = element_text(size=14, face="bold"), 
+	axis.text.x = element_text(size=14, colour = "black"),axis.text.y = element_text(size=14, colour = "black")) + 
+	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
+	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)")
+
+# to only display points *N*<sub>e</sub> 
+p2 <- ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
+   stat_summary(fun = "geometric.mean", mapping = aes(group=inds), 
+    geom = "point", color = "#00C08D", size = 15) +
 	theme_test() + 
 	theme(axis.title.x = element_text(size=24, face="bold"), axis.title.y = element_text(size=24, face="bold"), 
 	axis.text.x = element_text(size=24, colour = "black"),axis.text.y = element_text(size=24, colour = "black")) + 
 	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
-	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)")
-
-# to display zoom on point *N*<sub>e</sub> 
-p2 <- ggplot(indsubsets, aes(x=inds, y=Ne), color = "#00C08D", fill = "#00C08D") + 
-   stat_summary(fun = median, mapping = aes(group=inds), 
-    geom = "point", color = "#00C08D", size = 10) +
-	theme_test() + 
-	theme(axis.title.x = element_text(size=16, face="bold"), axis.title.y = element_text(size=16, face="bold"), 
-	axis.text.x = element_text(size=16, colour = "black"),axis.text.y = element_text(size=16, colour = "black")) + 
-	scale_x_continuous(limits=c(10,75), breaks=seq(0,75,15)) + scale_y_continuous(labels=comma) +
 	labs(x ="Number of individuals sampled", y = "Ne (Geometric mean)") + ylim(0, 5000)
 
 # to create an insert within the main plot.	
-p1 + annotation_custom(ggplotGrob(p2), xmin = 40, xmax = 75, 
-                       ymin = 30000, ymax = 75000)		
+p2 + annotation_custom(ggplotGrob(p1), xmin = 45, xmax = 75, 
+                       ymin = 0, ymax = 2000)		
 ```
 #### 3. Influence of population structure on *N*<sub>e</sub> estimation
 We first generate a list of SNPs, to subsample the dataset:
