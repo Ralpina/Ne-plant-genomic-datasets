@@ -207,13 +207,13 @@ for i in {1..50}; do
 done >> ./results/yellow99/Ne10M.txt
 ```
 
-We calculate median values and 95% confidence intervals using R (from command line):
+We calculate the geometric mean over 50 runs and the 95% confidence intervals using R (from command line):
 ```sh
 module load R/4.1.0
 R
 setwd("./results/yellow99")
 Ne10M <- read.delim("Ne10M.txt")
-median(Ne10M[[1]])
+exp(mean(log(Ne10M[[1]])))
 quantile(Ne10M[[1]], 0.025, type = 1)
 quantile(Ne10M[[1]], 0.975, type = 1)
 ```
@@ -221,7 +221,7 @@ quantile(Ne10M[[1]], 0.975, type = 1)
 We can now prepare the input file for plotting the results. The file ```SNPsubsets.txt``` looks like this:  
 ```
 Ne	LowCI	HighCI	SNPs	totalSNPs
-2828.0	2374.4	3128.9	20777.5	10000000
+2812.9	2374.4	3128.9	20777.5	10000000
 # ...etc.
 ```
 Plotting the results in R:
