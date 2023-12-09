@@ -1,7 +1,7 @@
 # *N*<sub>e</sub> estimation in GONE
 [![DOI](https://zenodo.org/badge/636225281.svg)](https://zenodo.org/badge/latestdoi/636225281)  
 The analyses presented here describe effective population size (*N*<sub>e</sub>) estimation carried out for four plant genomic datasets,  using the software GONE ([Santiago et al. 2020](https://doi.org/10.1093/molbev/msaa169)).
-The aims of these analyses are described in [Gargiulo et al. 2023](https://doi.org/10.1101/2023.07.18.549323). Please cite the article and this repository when using the code described here. Most scripts are included in this README; a few additional scripts are available in the scripts directory of this repository.
+The aims of these analyses are described in [Gargiulo et al. 2023](https://doi.org/10.1101/2023.07.18.549323). Please cite the article and this repository when using the code described here. Most scripts are included in this README; a few additional scripts are available in the scripts directory of this repository. All bash scripts were run on computer clusters.
 
 * Contact: r.gargiulo@kew.org | [@RobertaGargiu10](https://twitter.com/RobertaGargiu10)
 
