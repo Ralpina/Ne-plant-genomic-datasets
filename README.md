@@ -24,7 +24,7 @@ The aims of these analyses are described in [Gargiulo et al. 2023](https://doi.o
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset-1)
    - [Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#influence-of-missing-data-on-ne-estimation)
    - [*N*<sub>e</sub> estimation with fewer genomic scaffolds](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#ne-estimation-with-fewer-genomic-scaffolds)
-8. [Beyond GONE: dataset preparation for NeEstimator and currentNe](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
+8. [Beyond GONE: dataset preparation for NeEstimator and currentNe]([https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#beyond-gone-dataset-preparation-for-neestimator-and-currentne)
 9. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
@@ -1266,7 +1266,61 @@ bash script_GONE.sh Fagus12
 ```
 
 ## Beyond GONE: dataset preparation for NeEstimator and currentNe
-In our manuscript, we also used NeEstimator and currentNe to estimate contemporary effective population size.
+In our manuscript, we also used [NeEstimator](https://www.molecularfisherieslaboratory.com.au/neestimator-software/) and [currentNe](https://github.com/esrud/currentNe) to estimate contemporary effective population size. We generated the datasets as shown below and then converted them as appropriate (from vcf to Fstat format file for NeEstimator, using [PGDSpider](https://www.cmpg.iee.unibe.ch/services/software/pgdspider/index_eng.html)).
+
+For *S. globulifera*:  
+```sh
+module load vcftools/0.1.16
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds1 --recode --out Species1full 
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds2 --recode --out Species2full
+vcftools --vcf symcapture.all.biallelic.snp.filtered.nonmissing.125Contigs.paracou.recode.vcf --keep ./Ind_lists/Inds3 --recode --out Species3full
+```
+
+For *M. annua*:  
+```sh
+module load vcftools/0.1.16
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./poplist/Core --recode --out Core48
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./poplist/Atlantic --recode --out Atlantic48
+vcftools --vcf annua.48Contigs.recode.vcf --keep ./poplist/Mediter --recode --out Mediter48
+```
+
+For *F. sylvatica*:  
+```sh
+module load vcftools/0.1.16
+# for NeEstimator
+module load vcftools/0.1.16
+vcftools --vcf ./data/12scaffolds.recode.vcf --keep ./indlist/35inds --recode --stdout | gzip > ./data/Fagus12.recode.vcf.gz
+# let's obtain map (and ped) files 
+vcftools --gzvcf ./data/Fagus12.recode.vcf.gz --plink --out ./data/Fagus12.SNPs
+# We use the map file to extract the list of chromosomes and their variant sites
+cut -f 2 ./data/Fagus12.SNPs.map > ./snpslist/Fagus12.snps           
+wc -l ./snpslist/Fagus12.snps
+# 9791420 ./snpslist/Fagus12.snps
+shuf ./snpslist/Fagus12.snps | head -n 50000 | sort > ./snpslist/Fagus50K
+tr ':' '\t' < ./snpslist/Fagus50K > snpslist/Fagus50
+mv snpslist/Fagus50 ./snpslist/Fagus50K
+vcftools --gzvcf ./data/Fagus12.recode.vcf.gz --positions ./snpslist/Fagus50K --recode --out ./data/Fagus50K
+
+# for currentNe, which has a limit of 2000000 SNPs. We reduce the dataset to 1,500,000 random SNPs
+shuf ./snpslist/Fagus12.snps | head -n 1500000 | sort > ./snpslist/Fagus1.50M
+tr ':' '\t' < ./snpslist/Fagus1.50M > snpslist/Fagus1.50
+mv snpslist/Fagus1.50 ./snpslist/Fagus1.50M
+vcftools --gzvcf ./data/Fagus12.recode.vcf.gz --positions ./snpslist/Fagus1.50M --recode --out ./data/Fagus1.50M
+```
+
+For *P. armeniaca*:  
+```sh
+# from the dataset generated above with 3.5 million SNPs, we try to subsample dataset using both 1.5M SNPs and 50K SNPs:
+shuf ./snpslist/3.5M.SNPs | head -n 50000 | sort > ./snpslist/SNPs50K
+shuf ./snpslist/3.5M.SNPs | head -n 1500000 | sort > ./snpslist/SNPs1.5M.SNPs
+module load vcftools/0.1.16
+vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --positions ./snpslist/SNPs50K --recode --out ./data/armeniaca.50K
+vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --positions ./snpslist/SNPs1.5M.SNPs --recode --out ./data/armeniaca.1.50M
+# then separating Northern from Southern gene pool, filtering for missing data and indels (we had already removed indels in the initial dataset, but we include it just in case)
+vcftools --vcf ./data/armeniaca.50K.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/yellow99 --recode --out ./data/yellow99.50K.NoIndels
+vcftools --vcf ./data/armeniaca.50K.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/red99 --recode --out ./data/red99.50K.NoIndels
+vcftools --vcf ./data/armeniaca.1.50M.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/yellow99 --recode --out ./data/yellow99.1.50M.NoIndels
+vcftools --vcf ./data/armeniaca.1.50M.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/red99 --recode --out ./data/red99.1.50M.NoIndels
 
 
 
