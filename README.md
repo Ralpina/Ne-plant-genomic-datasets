@@ -24,7 +24,7 @@ The aims of these analyses are described in [Gargiulo et al. 2023](https://doi.o
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset-1)
    - [Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#influence-of-missing-data-on-ne-estimation)
    - [*N*<sub>e</sub> estimation with fewer genomic scaffolds](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#ne-estimation-with-fewer-genomic-scaffolds)
-8. [Beyond GONE: dataset preparation for NeEstimator and currentNe]([https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#beyond-gone-dataset-preparation-for-neestimator-and-currentne)
+8. [Beyond GONE: dataset preparation for NeEstimator and currentNe](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#beyond-gone-dataset-preparation-for-neestimator-and-currentne)
 9. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
