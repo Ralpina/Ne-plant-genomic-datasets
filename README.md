@@ -1321,7 +1321,7 @@ vcftools --vcf ./data/armeniaca.50K.recode.vcf --remove-indels --max-missing 0.8
 vcftools --vcf ./data/armeniaca.50K.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/red99 --recode --out ./data/red99.50K.NoIndels
 vcftools --vcf ./data/armeniaca.1.50M.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/yellow99 --recode --out ./data/yellow99.1.50M.NoIndels
 vcftools --vcf ./data/armeniaca.1.50M.recode.vcf --remove-indels --max-missing 0.8 --keep ./indlist/red99 --recode --out ./data/red99.1.50M.NoIndels
-
+```
 
 
 ## References
