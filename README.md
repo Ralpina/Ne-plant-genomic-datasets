@@ -24,7 +24,8 @@ The aims of these analyses are described in [Gargiulo et al. 2023](https://doi.o
    - [Preparing the dataset](https://github.com/Ralpina/Ne-plant-genomic-datasets#preparing-the-dataset-1)
    - [Influence of missing data on *N*<sub>e</sub> estimation](https://github.com/Ralpina/Ne-plant-genomic-datasets#influence-of-missing-data-on-ne-estimation)
    - [*N*<sub>e</sub> estimation with fewer genomic scaffolds](https://github.com/Ralpina/Ne-plant-genomic-datasets/blob/main/README.md#ne-estimation-with-fewer-genomic-scaffolds)
-8. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
+8. [Beyond GONE: dataset preparation for NeEstimator and currentNe](https://github.com/Ralpina/Ne-plant-genomic-datasets#fagus-sylvatica)
+9. [References](https://github.com/Ralpina/Ne-plant-genomic-datasets#references)
   
 ## Datasets used:
 - *Prunus armeniaca* in [Groppi et al. 2021](https://www.nature.com/articles/s41467-021-24283-6)
@@ -1263,6 +1264,11 @@ cp ./data/Fagus12.map ./results/12contigs/Fagus12.map
 # running GONE
 bash script_GONE.sh Fagus12
 ```
+
+## Beyond GONE: dataset preparation for NeEstimator and currentNe
+In our manuscript, we also used NeEstimator and currentNe to estimate contemporary effective population size.
+
+
 
 ## References
 Gargiulo, R., Decroocq, V., González-Martínez, S.C., Paz-Vinas, I., Aury, J.-M., Lesur-Kupin, I., Plomion, C., Schmitt, S., Scotti, I., Heuertz, M. (2023). Estimation of contemporary effective population size in plant populations: limitations of genomic datasets. bioRxiv 2023.07.18.549323; doi: https://doi.org/10.1101/2023.07.18.549323 
