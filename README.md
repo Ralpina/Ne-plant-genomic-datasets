@@ -478,6 +478,11 @@ for i in {1..50}; do
  shuf -n 77 ./indlist/all > ./indlist/all.$i
 done
 ```
+```sh
+for i in {1..50}; do
+ shuf -n 21 ./indlist/all > ./indlist/all21.$i
+done
+```
 As the scripts above have only generated lists of individuals; we now generate the actual SNPs dataset, in ped and map formats.
 ```sh
 module load vcftools/0.1.16
@@ -525,6 +530,10 @@ done
 
 for i in {1..50}; do 
  vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/all.$i --chrom-map ./data/chrom-map --out ./data/all.$i
+done
+
+for i in {1..50}; do 
+ vcftools --vcf ./data/armeniaca.3.5SNPs.recode.vcf --plink --keep ./indlist/all21.$i --chrom-map ./data/chrom-map --out ./data/all21.$i
 done
 ```
 We then modify ped and map files to the format required by GONE, as done previously, for example, for the Q-value 70% dataset:
@@ -648,18 +657,27 @@ We do the same for the Southern gene pool, then we concatenate the results in:
 ```sh
 cat ./results/NeYellow_25gen.txt ./results/NeRed_25gen.txt > ./results/NeVsStructure_25gen.txt
 ```
-For the total dataset, we keep results in separate files, but we can also combine them in the same plot if needed (not shown):
+For the total datasets, we keep results in separate files, but we can also combine them in the same plot if needed (not shown):
 ```sh
 # *N*<sub>e</sub> during the last generation across 50 datasets:
 for i in {1..50}; do
  awk 'NR==3' ./results/all/Output_Ne_all.$i 
 done | cut -f 2 > ./results/all/allNe.txt
+
+for i in {1..50}; do
+ awk 'NR==3' ./results/all/Output_Ne_all21.$i 
+done | cut -f 2 > ./results/all/all21Ne.txt
+
 # last 25 generations across 50 datasets:
 for i in {1..50}; do
  awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all.$i 
 done | cut -f 1,2 > ./results/all/all_Ne25gen.txt
+
+for i in {1..50}; do
+ awk 'NR>=3 && NR<=27' ./results/all/Output_Ne_all21.$i 
+done | cut -f 1,2 > ./results/all/all21_Ne25gen.txt
 ```
-The file ```NeVsStructure.txt``` (used below in R) looks like this:  
+The file ```NeVsStructure.txt``` (used in R, see below) looks like this:  
 ```
 Ne	group	pop
 3399.45	yellow99	yellow
@@ -673,11 +691,11 @@ Ne	group	pop
 170.765	red99	red
 196.732	red99	red
 # ... end of file:
-4118.63	all	red
-1233.03	all	red
-1784.73	all	red
+1578.2	all21	red
+1055.2	all21	red
+1622.6	all21	red
 ```
-The file ```NeVsStructure_25gen.txt``` (used below in R) looks like this:  
+The file ```NeVsStructure_25gen.txt``` (used in R, see below) looks like this:  
 ```
 gen	Ne	group	pop
 1	3399.45	p99	yellow
@@ -690,8 +708,8 @@ gen	Ne	group	pop
 2	6023.96	p80	yellow
 3	6023.96	p80	yellow
 # ... end of file:
-24	5070.48	allR	red
-25	5087.75	allR	red
+24	8441.78	allR	red
+25	8350.56	allR	red
 ```
 Plotting results in R:
 ```
